@@ -1,6 +1,6 @@
 # Hate Datasets Compilation
 
-Contains many different hate, violence, and discrimination speech datasets, along with anotations on where they were found, the data format and method for collection and labeling. Each dataset is kept in the original file structure and placed inside the respective folder's `data` filde, in case a more recent version is obtained. (Links for the source are in each ABOUT.md file)
+Contains 17 different hate, violence, and discrimination speech datasets, along with anotations on where they were found, the data format and method for collection and labeling. Each dataset is kept in the original file structure and placed inside the respective folder's `data` file, in case a more recent version is obtained. (Links for the source are in each ABOUT.md file)
 
 # Datasets
 
