@@ -6,8 +6,8 @@ FORMAT: tsv
 LANGUAGE: english
 ABOUT: Text strings were collected from Twitter and Facebook, and feature a number of tasks:
 - Task 1: Binary classification (Hateful and Offensive / Not Hateful or Offensive) (HOF/NOT)
-- Task 2: Multiclass (Hate Speech / Offensive / Profane) (HATE/OFFN/PRFN)
-- Task 3: Type of offense (Targeted Insult / Untargeted Insult) (TIN/UNT)
+- Task 2: Multiclass (Hate Speech / Offensive / Profane / No Hate) (HATE/OFFN/PRFN/NONE)
+- Task 3: Type of offense (Targeted Insult / Untargeted Insult / No Hate) (TIN/UNT/NONE)
 For a more detailed explaination see https://hasocfire.github.io/hasoc/2019/call_for_participation.html
 METHOD: [TODO]
 CITATION: [TODO]
