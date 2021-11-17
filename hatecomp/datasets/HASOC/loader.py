@@ -83,7 +83,3 @@ class HASOCDataset(Dataset):
 
     def __getitem__(self, index: int) -> torch.Tensor:
         return self.ids[index], self.data[index], self.labels[index]
-
-if __name__ == '__main__':
-    dataset = HASOCDataset()
-    print(len(dataset))

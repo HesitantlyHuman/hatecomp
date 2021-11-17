@@ -4,6 +4,8 @@ import os
 from tqdm import tqdm
 
 class ZipDownloader():
+    DEFAULT_DIRECTORY = None
+    
     def __init__(
         self,
         url,

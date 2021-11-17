@@ -27,7 +27,3 @@ class HASOCDownloader(ZipDownloader):
             elif os.path.isdir(path):
                 shutil.rmtree(path)
         '''
-
-if __name__ == '__main__':
-    downloader = HASOCDownloader()
-    downloader.load()
