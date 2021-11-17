@@ -2,9 +2,9 @@ import requests
 import zipfile
 import os
 
-DOWNLOAD_URL = 'https://hasocfire.github.io/hasoc/2019/files/english_dataset.zip'
-DOWNLOAD_DIR = './HASOC English Dataset/data/'
-FILENAME = 'english_dataset.zip'
+DOWNLOAD_URL = 'https://github.com/HKUST-KnowComp/MLMA_hate_speech/raw/master/hate_speech_mlma.zip'
+DOWNLOAD_DIR = './MLMA Dataset/data'
+FILENAME = 'hate_speech_mlma.zip'
 
 def _download_zip(
     save_path = None,
@@ -30,13 +30,15 @@ def _cleanup_HASOC(
 ):
     pass
 
-def download_HASOC(
+def download_MLMA(
     save_path = None,
     unzip = True,
     keep_zip = False,
     chunk_size = 128
 ):
     if save_path is None:
+        if not os.path.exists(DOWNLOAD_DIR):
+            os.mkdir(DOWNLOAD_DIR)
         save_path = os.path.join(DOWNLOAD_DIR, FILENAME)
 
     _download_zip(
@@ -49,4 +51,4 @@ def download_HASOC(
         os.remove(save_path)
 
 if __name__ == '__main__':
-    download_HASOC()
+    download_MLMA()
