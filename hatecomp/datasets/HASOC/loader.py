@@ -2,13 +2,15 @@ from typing import List, Tuple
 
 import os
 import csv
+import logging
 
 import torch
 import numpy as np
 from torch.utils.data import Dataset
 
-DOWNLOAD_DIR = '/HASOC English Dataset/data'
-DATA_RELATIVE_PATH = '/english_dataset'
+from hatecomp.datasets.HASOC.download import HASOCDownloader, DEFAULT_DIRECTORY
+
+DATA_RELATIVE_PATH = 'english_dataset'
 
 class HASOCDataset(Dataset):
     TSV_FILES = {
@@ -28,16 +30,30 @@ class HASOCDataset(Dataset):
 
     def __init__(
         self,
-        data_dir = None,
+        path = None,
         test = False,
         one_hot = True
     ):
-        if data_dir is None:
-            data_dir = os.path.join(DOWNLOAD_DIR, DATA_RELATIVE_PATH)
+        if path is None:
+            save_path = DEFAULT_DIRECTORY
+        data_dir = os.path.join(save_path, DATA_RELATIVE_PATH)
 
+        self.save_path = save_path
         self.data_dir = data_dir
-        self.ids, self.data, self.labels = self._load_data(self.data_dir, test = test)
+        try:
+            self.ids, self.data, self.labels = self._load_data(self.data_dir, test = test)
+        except FileNotFoundError:
+            logging.info(f'HASOC data not found at expected location {self.data_dir}.')
+            self._download(self.save_path)
+            self.ids, self.data, self.labels = self._load_data(self.data_dir, test = test)
         self.one_hot = one_hot
+
+    def _download(self, path: str):
+        logging.info(f'Downloading HASOC data to location f{self.data_dir}.')
+        downloader = HASOCDownloader(
+            save_path = path
+        )
+        downloader.load()
 
     def _load_data(self, path: str, test = False) -> Tuple[List]:
         if test:

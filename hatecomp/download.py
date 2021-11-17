@@ -1,6 +1,7 @@
 import requests
 import zipfile
 import os
+from tqdm import tqdm
 
 class ZipDownloader():
     def __init__(
@@ -30,9 +31,12 @@ class ZipDownloader():
 
     def download(self, url: str, path: str, chunk_size: int) -> None:
         response = requests.get(url = url, stream = True)
+        content_length = int(response.headers['Content-Length'])
         with open(path, 'wb') as zip:
+            progress_bar = tqdm(total = content_length)
             for chunk in response.iter_content(chunk_size = chunk_size):
                 zip.write(chunk)
+                progress_bar.update(chunk_size)
 
     def unzip(self, origin_path: str, destination_path: str = None) -> None:
         if destination_path is None:
