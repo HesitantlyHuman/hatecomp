@@ -3,7 +3,7 @@ import zipfile
 import os
 from tqdm import tqdm
 
-class ZipDownloader():
+class _ZipDownloader():
     DEFAULT_DIRECTORY = None
     
     def __init__(

@@ -1,1 +1,1 @@
-from loader import HASOCDataset
+from hatecomp.datasets.HASOC.loader import HASOCDataset

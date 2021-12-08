@@ -1,9 +1,9 @@
 import os
 
-from hatecomp.download import ZipDownloader
+from hatecomp.base.download import _ZipDownloader
 from hatecomp._path import install_path
 
-class MLMADownloader(ZipDownloader):
+class MLMADownloader(_ZipDownloader):
     DEFAULT_DIRECTORY = os.path.join(install_path, 'datasets/MLMA/data')
     DOWNLOAD_URL = 'https://github.com/HKUST-KnowComp/MLMA_hate_speech/raw/master/hate_speech_mlma.zip'
     def __init__(self, save_path = None, unzip=True, keep_zip=False, chunk_size=128) -> None:
