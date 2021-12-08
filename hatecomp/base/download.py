@@ -3,6 +3,25 @@ import zipfile
 import os
 from tqdm import tqdm
 
+class _CSVDownloader():
+    DEFAULT_DIRECTORY = None
+
+    def __init__(self, urls, save_path):
+        self.urls = urls
+        if not os.path.exists(save_path):
+            os.mkdir(save_path)
+        self.save_path = save_path
+
+    def load(self) -> None:
+        for url in self.urls:
+            save_path = os.path.join(self.save_path, url.split('/')[-1])
+            self.download(url, save_path)
+
+    def download(self, url: str, path: str) -> None:
+        response = requests.get(url = url)
+        with open(path, 'w') as csv:
+            csv.write(response.text)
+
 class _ZipDownloader():
     DEFAULT_DIRECTORY = None
     
