@@ -41,3 +41,9 @@ class TweetDownloader():
 
     async def _get_session(self, keys) -> aiohttp.ClientSession:
         return aiohttp.ClientSession()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        pass

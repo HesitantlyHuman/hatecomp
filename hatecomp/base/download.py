@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 class _CSVDownloader():
     DEFAULT_DIRECTORY = None
+    SAVE_PATHS = {}
 
     def __init__(self, urls, save_path):
         self.urls = urls
@@ -16,6 +17,7 @@ class _CSVDownloader():
         for url in self.urls:
             save_path = os.path.join(self.save_path, url.split('/')[-1])
             self.download(url, save_path)
+            self.SAVE_PATHS[url] = save_path
 
     def download(self, url: str, path: str) -> None:
         response = requests.get(url = url)
