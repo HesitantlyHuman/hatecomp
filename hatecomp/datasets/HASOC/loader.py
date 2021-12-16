@@ -6,7 +6,7 @@ import csv
 import numpy as np
 
 from hatecomp.base.dataset import _HateDataset
-from hatecomp.datasets.HASOC.download import HASOCDownloader, DEFAULT_DIRECTORY
+from hatecomp.datasets.HASOC.download import HASOCDownloader
 
 class HASOCDataset(_HateDataset):
     __name__ = 'HASOC'
@@ -36,12 +36,17 @@ class HASOCDataset(_HateDataset):
         super(HASOCDataset, self).__init__(path = path)
         
     def _load_data(self, path: str) -> Tuple[List]:
-        returns = ([], [], [])
+        data_lists = [None, None, None]
         for tsv_file in HASOCDataset.TSV_FILES:
             tsv_path = os.path.join(path, tsv_file)
             tsv = self._read_tsv(tsv_path)
-            returns = returns + self._convert_tsv(tsv)
-        return returns
+            data = self._convert_tsv(tsv)
+            for idx, incoming in enumerate(data):
+                if data_lists[idx] is None:
+                    data_lists[idx] = incoming
+                else:
+                    data_lists[idx] = np.concatenate((data_lists[idx], incoming))
+        return tuple(data_lists)
 
     def _read_tsv(self, path: str) -> List[List[str]]:
         with open(path) as file:
@@ -55,4 +60,7 @@ class HASOCDataset(_HateDataset):
             ids.append(row[0])
             data.append(row[1])
             labels.append([HASOCDataset.ENCODING_KEY[encoding] for encoding in row[2:]])
-        return (np.array(data_list) for data_list in [ids, data, labels])
+        return tuple(np.array(data_list) for data_list in [ids, data, labels])
+
+def namestr(obj, namespace):
+    return [name for name in namespace if namespace[name] is obj]

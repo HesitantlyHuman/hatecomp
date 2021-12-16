@@ -18,11 +18,11 @@ class _HateDataset(Dataset):
 
         self.save_path = save_path
         try:
-            self.ids, self.data, self.labels = self._load_data(self.save_path, test = test)
+            self.ids, self.data, self.labels = self._load_data(self.save_path)
         except FileNotFoundError:
             logging.info(f'{self.__name__} data not found at expected location {self.save_path}.')
             self._download(self.save_path)
-            self.ids, self.data, self.labels = self._load_data(self.save_path, test = test)
+            self.ids, self.data, self.labels = self._load_data(self.save_path)
 
     def _download(self, path: str):
         logging.info(f'Downloading {self.__name__} data to location f{path}.')
