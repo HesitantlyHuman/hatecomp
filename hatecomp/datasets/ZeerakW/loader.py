@@ -12,7 +12,9 @@ class NAACLDataset(_HateDataset):
     __name__ = 'NAACL'
     downloader = ZeerakWDownloader
 
-    CSV_FILE = 'NAACL_SRW_2016.csv'
+    CSV_FILES = [
+        'NAACL_SRW_2016.csv'
+    ]
     ENCODING_KEY = {
         'none' : 0,
         'racism' : 1,
@@ -34,10 +36,10 @@ class NAACLDataset(_HateDataset):
             tsv = self._read_tsv(tsv_path)
             returns = returns + self._convert_tsv(tsv)
         return returns
-'''
+
     def _read_tsv(self, path: str) -> List[List[str]]:
         with open(path) as file:
-            return list(csv.reader(file, delimiter = '\t'))
+            return list(csv.reader(file))
 
     def _convert_tsv(self, tsv: List[List[str]]) -> Tuple[List]:
         ids = []
@@ -46,6 +48,5 @@ class NAACLDataset(_HateDataset):
         for row in tsv[1:]:
             ids.append(row[0])
             data.append(row[1])
-            labels.append([HASOCDataset.ENCODING_KEY[encoding] for encoding in row[2:]])
-        return (np.array(data_list) for data_list in [ids, data, labels])
-'''
+            labels.append([NAACLDataset.ENCODING_KEY[encoding] for encoding in row[2:]])
+        return tuple(np.array(data_list) for data_list in [ids, data, labels])

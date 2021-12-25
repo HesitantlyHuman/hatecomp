@@ -18,11 +18,15 @@ class _CSVDownloader():
             save_path = os.path.join(self.save_path, url.split('/')[-1])
             self.download(url, save_path)
             self.SAVE_PATHS[url] = save_path
+        self.cleanup()
 
     def download(self, url: str, path: str) -> None:
         response = requests.get(url = url)
         with open(path, 'w') as csv:
             csv.write(response.text)
+
+    def cleanup(self) -> None:
+        pass
 
 class _ZipDownloader():
     DEFAULT_DIRECTORY = None
@@ -42,14 +46,15 @@ class _ZipDownloader():
 
         if not os.path.exists(save_path):
             os.mkdir(save_path)
-        self.save_path = os.path.join(save_path, 'temp.zip')
+        self.save_path = save_path
 
     def load(self) -> None:
-        self.download(url = self.url, path = self.save_path, chunk_size = self.chunk_size)
+        temp_path = os.path.join(self.save_path, 'temp.zip')
+        self.download(url = self.url, path = temp_path, chunk_size = self.chunk_size)
         if self.do_unzip:
-            self.unzip(origin_path = self.save_path)
+            self.unzip(origin_path = temp_path)
             if not self.keep_zip:
-                os.remove(path = self.save_path)
+                os.remove(path = temp_path)
         self.cleanup(path = self.save_path)
 
     def download(self, url: str, path: str, chunk_size: int) -> None:
