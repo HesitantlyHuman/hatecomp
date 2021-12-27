@@ -59,7 +59,10 @@ class _ZipDownloader():
 
     def download(self, url: str, path: str, chunk_size: int) -> None:
         response = requests.get(url = url, stream = True)
-        content_length = int(response.headers['Content-Length'])
+        try:
+            content_length = int(response.headers['Content-Length'])
+        except KeyError:
+            content_length = None
         with open(path, 'wb') as zip:
             progress_bar = tqdm(total = content_length)
             for chunk in response.iter_content(chunk_size = chunk_size):
