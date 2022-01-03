@@ -6,6 +6,9 @@ __pycache__/
 # All of the repo data
 data/
 
+# Twitter stuff
+hatecomp/twitter/keys.json
+
 # C extensions
 *.so
 

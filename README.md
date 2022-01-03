@@ -2,9 +2,18 @@
 
 Contains 17 different hate, violence, and discrimination speech datasets, along with anotations on where they were found, the data format and method for collection and labeling. Each dataset is kept in the original file structure and placed inside the respective folder's `data` file, in case a more recent version is obtained. (Links for the source are in each ABOUT.md file)
 
+# Using
+[TODO]: Detail how to download and use
+
 # Datasets
 
 Additional information about each dataset can be found the corresponding ABOUT.md file. There is such a file located at the root directory of each dataset.
+
+## Working
+Currently only the following datasets are implemented:
+- ZeerakW
+- HASOC
+- Vicomtech
 
 ## Useful Dataset
 The datasets collected which contain annotated or labeled english text are the following:
