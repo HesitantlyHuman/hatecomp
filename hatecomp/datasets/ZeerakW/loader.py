@@ -12,6 +12,8 @@ class NAACLDataset(_HateDataset):
     __name__ = 'NAACL'
     downloader = ZeerakWDownloader
 
+    PATH = 'hatecomp/datasets/ZeerakW/data/NAACL_SRW_2016.csv'
+
     CSV_FILES = [
         'NAACL_SRW_2016.csv'
     ]
@@ -27,9 +29,9 @@ class NAACLDataset(_HateDataset):
         one_hot = True
     ):
         self.one_hot = one_hot
-        super(NAACLDataset, self).__init__(path = path)
+        super(NAACLDataset, self).__init__(path = self.PATH)
         
-    def _load_data(self, path: str) -> Tuple[List]:
+    def _load_data(self) -> Tuple[List]:
         returns = ([], [], [])
         for tsv_file in NAACLDataset.CSV_FILES:
             tsv_path = os.path.join(path, tsv_file)
@@ -50,3 +52,7 @@ class NAACLDataset(_HateDataset):
             data.append(row[1])
             labels.append([NAACLDataset.ENCODING_KEY[encoding] for encoding in row[2:]])
         return tuple(np.array(data_list) for data_list in [ids, data, labels])
+        
+
+if __name__ == '__main__':
+    dataset = NAACLDataset()

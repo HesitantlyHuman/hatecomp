@@ -10,10 +10,10 @@ Contains 17 different hate, violence, and discrimination speech datasets, along 
 Additional information about each dataset can be found the corresponding ABOUT.md file. There is such a file located at the root directory of each dataset.
 
 ## Working
-
 Currently only the following datasets are implemented:
 - ZeerakW
 - HASOC
+- Vicomtech
 
 ## Useful Dataset
 The datasets collected which contain annotated or labeled english text are the following:
