@@ -25,7 +25,7 @@ class NAACLDataset(_HatecompDataset):
     def __init__(self, root: str = None, download=False):
         super().__init__(root=root, download=download)
         
-    def _load_data(self, path: str) -> Tuple[List]:
+    def load_data(self, path: str) -> Tuple[List]:
         with open(os.path.join(path, self.CSV_FILE)) as data_file:
             csv_data = list(csv.reader(data_file))
         ids, data, labels = [], [], []
