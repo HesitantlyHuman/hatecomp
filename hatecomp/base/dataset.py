@@ -10,14 +10,18 @@ from torch.utils.data.dataset import Subset
 class _HatecompDataset(Dataset):
     __name__ = 'None'
     DOWNLOADER = None
+    DEFAULT_DIRECTORY = None
 
     def __init__(
         self,
         root: str = None,
         download = False,
     ):
-        if root is None and download is False:
-            raise ValueError('root cannot be None if download is False. Either set root to the data root directory or download to True')
+        if root is None:
+            if download:
+                root = self.DEFAULT_DIRECTORY
+            else:
+                raise ValueError('root cannot be None if download is False. Either set root to the data root directory or download to True')
         
         self.root = root
         try:
@@ -37,7 +41,7 @@ class _HatecompDataset(Dataset):
 
     def _download(self, path: str):
         logging.info(f'Downloading {self.__name__} data to location f{path}.')
-        downloader = self.downloader(
+        downloader = self.DOWNLOADER(
             save_path = path
         )
         downloader.load()
