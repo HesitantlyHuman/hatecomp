@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Callable, List, Tuple
 
 import logging
 
@@ -11,6 +11,7 @@ class _HatecompDataset(Dataset):
     __name__ = 'None'
     DOWNLOADER = None
     DEFAULT_DIRECTORY = None
+    LABEL_ENCODING = None
 
     def __init__(
         self,
@@ -25,29 +26,36 @@ class _HatecompDataset(Dataset):
         
         self.root = root
         try:
-            self.ids, self.data, self.labels = self._load_data(self.root)
+            self.ids, self.data, self.labels = self.load_data(self.root)
         except FileNotFoundError:
             logging.info(f'{self.__name__} data not found at expected location {self.root}.')
             if download:
-                self._download(self.root)
-                self.ids, self.data, self.labels = self._load_data(self.root)
+                self.download(self.root)
+                self.ids, self.data, self.labels = self.load_data(self.root)
             else:
                 raise FileNotFoundError(f'Could not find data at {self.root}')
+        self.labels = self.encode_labels(self.LABEL_ENCODING)
 
     def split(self, p = 0.9) -> Tuple[Subset, Subset]:
         train_size = int(p * len(self))
         test_size = len(self) - train_size
         return torch.utils.data.random_split(self, [train_size, test_size])
 
-    def _download(self, path: str):
+    def download(self, path: str):
         logging.info(f'Downloading {self.__name__} data to location f{path}.')
         downloader = self.DOWNLOADER(
             save_path = path
         )
         downloader.load()
 
-    def _load_data(self, path: str) -> Tuple[np.array, np.array, np.array]:
+    def load_data(self, path: str) -> Tuple[np.array, np.array, np.array]:
         return np.array([]), np.array([]), np.array([])
+
+    def encode_labels(self, encoding_scheme: dict) -> List:
+        encoded_labels = []
+        for labels in self.labels:
+            encoded_labels.append([encoding_scheme[label] for label in labels])
+        return encoded_labels
 
     def __len__(self) -> int:
         return len(self.data)
