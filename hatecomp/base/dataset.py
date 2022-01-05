@@ -5,6 +5,7 @@ import logging
 import torch
 from torch.utils.data import Dataset
 import numpy as np
+from torch.utils.data.dataset import Subset
 
 class _HatecompDataset(Dataset):
     __name__ = 'None'
@@ -29,6 +30,11 @@ class _HatecompDataset(Dataset):
             else:
                 raise FileNotFoundError(f'Could not find data at {self.root}')
 
+    def split(self, p = 0.9) -> Tuple[Subset, Subset]:
+        train_size = int(p * len(self))
+        test_size = len(self) - train_size
+        return torch.utils.data.random_split(self, [train_size, test_size])
+
     def _download(self, path: str):
         logging.info(f'Downloading {self.__name__} data to location f{path}.')
         downloader = self.downloader(
@@ -36,11 +42,11 @@ class _HatecompDataset(Dataset):
         )
         downloader.load()
 
-    def _load_data(self, path: str) -> Tuple[np.array]:
+    def _load_data(self, path: str) -> Tuple[np.array, np.array, np.array]:
         return np.array([]), np.array([]), np.array([])
 
     def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(self, index: int) -> torch.Tensor:
+    def __getitem__(self, index: int) -> Tuple:
         return self.ids[index], self.data[index], self.labels[index]
