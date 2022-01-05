@@ -4,7 +4,6 @@ import os
 from tqdm import tqdm
 
 class _CSVDownloader():
-    DEFAULT_DIRECTORY = None
     SAVE_PATHS = {}
 
     def __init__(self, urls, save_path):
@@ -29,8 +28,6 @@ class _CSVDownloader():
         pass
 
 class _ZipDownloader():
-    DEFAULT_DIRECTORY = None
-    
     def __init__(
         self,
         url,
