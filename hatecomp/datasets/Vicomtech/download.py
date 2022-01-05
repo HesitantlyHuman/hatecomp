@@ -6,12 +6,9 @@ from hatecomp.base.download import _ZipDownloader
 from hatecomp._path import install_path
 
 class VicomtechDownloader(_ZipDownloader):
-    DEFAULT_DIRECTORY = os.path.join(install_path, 'datasets/Vicomtech/data')
     DOWNLOAD_URL = 'https://github.com/Vicomtech/hate-speech-dataset/archive/refs/heads/master.zip'
 
-    def __init__(self, save_path = None) -> None:
-        if save_path is None:
-            save_path = self.DEFAULT_DIRECTORY
+    def __init__(self, save_path) -> None:
         url = self.DOWNLOAD_URL
         super().__init__(url, save_path)
 
