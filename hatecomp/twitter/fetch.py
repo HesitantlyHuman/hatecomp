@@ -114,4 +114,4 @@ class TooFast(Exception):
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
     downloader = TweetDownloader()
-    print(downloader.download([572342978255048705]))
+    print(downloader.download(['572348198062170112']))
