@@ -4,20 +4,22 @@ import os
 import csv
 
 import numpy as np
+from torch.utils import data
 
-from hatecomp.base.dataset import _HatecompDataset
 from hatecomp._path import install_path
-from hatecomp.datasets.Vicomtech.download import VicomtechDownloader
+from hatecomp.base.dataset import _HatecompDataset
+from hatecomp.datasets.TwitterSexism.download import TwitterSexismDownloader
 
-class VicomtechDataset(_HatecompDataset):
-    __name__ = 'Vicomtech'
-    DOWNLOADER = VicomtechDownloader
-    DEFAULT_DIRECTORY = os.path.join(install_path, 'datasets/Vicomtech/data')
+class TwitterSexismDataset(_HatecompDataset):
+    __name__ = 'TwitterSexism'
+    DOWNLOADER = TwitterSexismDownloader
+    DEFAULT_DIRECTORY = os.path.join(install_path, 'datasets/TwitterSexism/data')
 
-    CSV_FILE = 'vicomtech.csv'
+    CSV_FILE = 'twitter_sexism.csv'
     ENCODING_KEY = {
-        'noHate' : 0,
-        'hate' : 1,
+        'none' : 0,
+        'benevolent' : 1,
+        'hostile' : 2
     }
 
     def __init__(self, root: str = None, download=False):
@@ -32,7 +34,8 @@ class VicomtechDataset(_HatecompDataset):
             data.append(item[1])
             labels.append(item[2:])
         return (np.array(ids), np.array(data), np.array(labels))
-
+        
 if __name__ == '__main__':
-    dataset = VicomtechDataset(download = True)
+    dataset = TwitterSexismDataset(download = True)
     print(dataset[0])
+    print(len(dataset))
