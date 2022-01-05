@@ -6,8 +6,8 @@ import csv
 import numpy as np
 
 from hatecomp.base.dataset import _HatecompDataset
-from hatecomp.datasets.HASOC.download import HASOCDownloader
 from hatecomp._path import install_path
+from hatecomp.datasets.HASOC.download import HASOCDownloader
 
 class HASOCDataset(_HatecompDataset):
     __name__ = 'HASOC'
