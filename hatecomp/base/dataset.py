@@ -4,25 +4,30 @@ import logging
 
 import torch
 from torch.utils.data import Dataset
+import numpy as np
 
-class _HateDataset(Dataset):
+class _HatecompDataset(Dataset):
     __name__ = 'None'
-    downloader = None
+    DOWNLOADER = None
 
     def __init__(
         self,
-        path = None
+        root: str = None,
+        download = False,
     ):
-        if path is None:
-            save_path = self.downloader.DEFAULT_DIRECTORY
-
-        self.save_path = save_path
+        if root is None and download is False:
+            raise ValueError('root cannot be None if download is False. Either set root to the data root directory or download to True')
+        
+        self.root = root
         try:
-            self.ids, self.data, self.labels = self._load_data(self.save_path)
+            self.ids, self.data, self.labels = self._load_data(self.root)
         except FileNotFoundError:
-            logging.info(f'{self.__name__} data not found at expected location {self.save_path}.')
-            self._download(self.save_path)
-            self.ids, self.data, self.labels = self._load_data(self.save_path)
+            logging.info(f'{self.__name__} data not found at expected location {self.root}.')
+            if download:
+                self._download(self.root)
+                self.ids, self.data, self.labels = self._load_data(self.root)
+            else:
+                raise FileNotFoundError(f'Could not find data at {self.root}')
 
     def _download(self, path: str):
         logging.info(f'Downloading {self.__name__} data to location f{path}.')
@@ -31,8 +36,8 @@ class _HateDataset(Dataset):
         )
         downloader.load()
 
-    def _load_data(self, path: str) -> Tuple[List]:
-        return [], [], []
+    def _load_data(self, path: str) -> Tuple[np.array]:
+        return np.array([]), np.array([]), np.array([])
 
     def __len__(self) -> int:
         return len(self.data)
