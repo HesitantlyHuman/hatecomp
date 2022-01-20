@@ -1,6 +1,7 @@
 from typing import Callable, List, Tuple
 
 import logging
+import os
 
 import torch
 from torch.utils.data import Dataset
@@ -8,6 +9,8 @@ import numpy as np
 from torch.utils.data.dataset import Subset
 
 from hatecomp.base.utils import tokenize_bookends
+
+os.environ['TOKENIZERS_PARALLELISM'] = 'true'
 
 class TokenizerDataset(Dataset):
     def __init__(self, dataset: Dataset, tokenizer: Callable) -> None:
