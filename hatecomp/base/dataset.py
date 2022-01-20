@@ -36,7 +36,7 @@ class TokenizerDataset(Dataset):
         data_item = self.data[index]
         return {key : value for key, value in data_item.items() if not key == 'id'}
 
-    def tokenize_with_huggingface(dataset: Dataset, tokenizer: Callable, max_token_length = 512):
+    def from_huggingface(dataset: Dataset, tokenizer: Callable, max_token_length = 512):
         tokenizer_function = lambda string_in : tokenize_bookends(
             string_in,
             max_token_length,
