@@ -98,4 +98,8 @@ class _HatecompDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, index: int) -> Tuple:
-        return self.ids[index], self.data[index], self.labels[index]
+        return {
+            'id' : self.ids[index], 
+            'data' : self.data[index],
+            'label' : self.labels[index]
+        }
