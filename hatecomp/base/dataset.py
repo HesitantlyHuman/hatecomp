@@ -7,6 +7,40 @@ from torch.utils.data import Dataset
 import numpy as np
 from torch.utils.data.dataset import Subset
 
+from hatecomp.base.utils import tokenize_bookends
+
+class TokenizerDataset(Dataset):
+    def __init__(self, dataset: Dataset, tokenizer: Callable) -> None:
+        super().__init__()
+
+        self.data = self.tokenize_data(dataset, tokenizer)
+
+    def tokenize_data(self, dataset: Dataset, tokenizer: Callable) -> List:
+        return [self.tokenize_single(item, tokenizer) for item in dataset.data]
+
+    def tokenize_single(self, item: dict, tokenizer: Callable) -> dict:
+        formatted_item = {
+            'id' : item['id'],
+            'label' : torch.tensor(item['label'])
+        }
+        formatted_item.update({key: torch.tensor(value) for key, value in tokenizer(str(item['data'])).items()})
+        return formatted_item
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, index):
+        data_item = self.data[index]
+        return {key : value for key, value in data_item.items() if not key == 'id'}
+
+    def tokenize_with_huggingface(dataset: Dataset, tokenizer: Callable, max_token_length = 512):
+        tokenizer_function = lambda string_in : tokenize_bookends(
+            string_in,
+            max_token_length,
+            lambda x : tokenizer(x, padding = 'max_length', max_length = max_token_length)
+        )
+        return TokenizerDataset(dataset, tokenizer_function)
+
 class _HatecompDataset(Dataset):
     __name__ = 'None'
     DOWNLOADER = None
