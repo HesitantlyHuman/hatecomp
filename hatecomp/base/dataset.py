@@ -19,7 +19,7 @@ class TokenizerDataset(Dataset):
         self.data = self.tokenize_data(dataset, tokenizer)
 
     def tokenize_data(self, dataset: Dataset, tokenizer: Callable) -> List:
-        return [self.tokenize_single(item, tokenizer) for item in dataset.data]
+        return [self.tokenize_single(item, tokenizer) for item in dataset]
 
     def tokenize_single(self, item: dict, tokenizer: Callable) -> dict:
         formatted_item = {
