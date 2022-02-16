@@ -19,7 +19,7 @@ class NAACLDataset(_HatecompDataset):
     CSV_FILE = "NAACL_SRW_2016.csv"
     ENCODING_KEY = {"none": 0, "racism": 1, "sexism": 2}
 
-    def __init__(self, root: str = None, download=False):
+    def __init__(self, root: str = None, download: bool = True):
         super().__init__(root=root, download=download)
 
     def load_data(self, path: str) -> Tuple[List]:
@@ -41,7 +41,7 @@ class NLPCSSDataset(_HatecompDataset):
     CSV_FILE = "NLP%2BCSS_2016.csv"
     ENCODING_KEY = {"none": 0, "racism": 1, "sexism": 2}
 
-    def __init__(self, root: str = None, download=False):
+    def __init__(self, root: str = None, download: bool = True):
         super().__init__(root=root, download=download)
 
     def _load_data(self, path: str) -> Tuple[List]:

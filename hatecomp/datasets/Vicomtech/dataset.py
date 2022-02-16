@@ -5,24 +5,25 @@ import csv
 
 import numpy as np
 
-from hatecomp.base.dataset import _HatecompDataset
+from hatecomp.base.data import _HatecompDataset
 from hatecomp._path import install_path
 from hatecomp.datasets.Vicomtech.download import VicomtechDownloader
 
-class VicomtechDataset(_HatecompDataset):
-    __name__ = 'Vicomtech'
-    DOWNLOADER = VicomtechDownloader
-    DEFAULT_DIRECTORY = os.path.join(install_path, 'datasets/Vicomtech/data')
 
-    CSV_FILE = 'vicomtech.csv'
+class VicomtechDataset(_HatecompDataset):
+    __name__ = "Vicomtech"
+    DOWNLOADER = VicomtechDownloader
+    DEFAULT_DIRECTORY = os.path.join(install_path, "datasets/Vicomtech/data")
+
+    CSV_FILE = "vicomtech.csv"
     ENCODING_KEY = {
-        'noHate' : 0,
-        'hate' : 1,
+        "noHate": 0,
+        "hate": 1,
     }
 
-    def __init__(self, root: str = None, download=False):
+    def __init__(self, root: str = None, download: bool = True):
         super().__init__(root=root, download=download)
-        
+
     def load_data(self, path: str) -> Tuple[List]:
         with open(os.path.join(path, self.CSV_FILE)) as data_file:
             csv_data = list(csv.reader(data_file))
@@ -33,6 +34,7 @@ class VicomtechDataset(_HatecompDataset):
             labels.append(item[2:])
         return (np.array(ids), np.array(data), np.array(labels))
 
-if __name__ == '__main__':
-    dataset = VicomtechDataset(download = True)
+
+if __name__ == "__main__":
+    dataset = VicomtechDataset(download=True)
     print(dataset[0])

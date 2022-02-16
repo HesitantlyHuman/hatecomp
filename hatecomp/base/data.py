@@ -3,7 +3,7 @@ import logging
 import os
 
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 import numpy as np
 from torch.utils.data.dataset import Subset
 
@@ -55,7 +55,7 @@ class _HatecompDataset(Dataset):
     def __init__(
         self,
         root: str = None,
-        download=False,
+        download: bool = True,
     ):
         if root is None:
             if download:
@@ -79,7 +79,7 @@ class _HatecompDataset(Dataset):
                 raise FileNotFoundError(f"Could not find data at {self.root}")
         self.labels = self.encode_labels(self.LABEL_ENCODING)
 
-    def split(self, p=0.9) -> Tuple[Subset, Subset]:
+    def split(self, p: float = 0.9) -> Tuple[Subset, Subset]:
         train_size = int(p * len(self))
         test_size = len(self) - train_size
         return torch.utils.data.random_split(self, [train_size, test_size])
@@ -109,7 +109,7 @@ class _HatecompDataset(Dataset):
         }
 
 
-class Dataloader(torch.utils.data.Dataloader):
+class DataLoader(DataLoader):
     def __init__(self, *args, **kwargs) -> None:
         kwargs.update({"colate_fn": id_collate})
         super().__init__(*args, **kwargs)
