@@ -16,7 +16,7 @@ class VicomtechDataset(_HatecompDataset):
     DEFAULT_DIRECTORY = os.path.join(install_path, "datasets/Vicomtech/data")
 
     CSV_FILE = "vicomtech.csv"
-    ENCODING_KEY = {
+    LABEL_KEY = {
         "noHate": 0,
         "hate": 1,
     }

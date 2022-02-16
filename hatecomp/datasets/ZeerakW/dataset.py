@@ -17,7 +17,7 @@ class NAACLDataset(_HatecompDataset):
     DEFAULT_DIRECTORY = os.path.join(install_path, "datasets/ZeerakW/data")
 
     CSV_FILE = "NAACL_SRW_2016.csv"
-    ENCODING_KEY = {"none": 0, "racism": 1, "sexism": 2}
+    LABEL_KEY = {"none": 0, "racism": 1, "sexism": 2}
 
     def __init__(self, root: str = None, download: bool = True):
         super().__init__(root=root, download=download)
@@ -39,7 +39,7 @@ class NLPCSSDataset(_HatecompDataset):
     DEFAULT_DIRECTORY = os.path.join(install_path, "datasets/ZeerakW/data")
 
     CSV_FILE = "NLP%2BCSS_2016.csv"
-    ENCODING_KEY = {"none": 0, "racism": 1, "sexism": 2}
+    LABEL_KEY = {"none": 0, "racism": 1, "sexism": 2}
 
     def __init__(self, root: str = None, download: bool = True):
         super().__init__(root=root, download=download)

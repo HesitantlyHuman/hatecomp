@@ -50,7 +50,7 @@ class _HatecompDataset(Dataset):
     __name__ = "None"
     DOWNLOADER = None
     DEFAULT_DIRECTORY = None
-    LABEL_ENCODING = None
+    LABEL_KEY = None
 
     def __init__(
         self,
@@ -77,7 +77,7 @@ class _HatecompDataset(Dataset):
                 self.ids, self.data, self.labels = self.load_data(self.root)
             else:
                 raise FileNotFoundError(f"Could not find data at {self.root}")
-        self.labels = self.encode_labels(self.LABEL_ENCODING)
+        self.labels = self.encode_labels(self.LABEL_KEY)
 
     def split(self, p: float = 0.9) -> Tuple[Subset, Subset]:
         train_size = int(p * len(self))
