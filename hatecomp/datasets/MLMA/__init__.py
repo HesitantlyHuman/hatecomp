@@ -1,1 +1,1 @@
-from hatecomp.datasets.MLMA.loader import MLMADataset
+from hatecomp.datasets.MLMA.dataset import MLMADataset

@@ -30,7 +30,7 @@ class NAACLDataset(_HatecompDataset):
             ids.append(item[0])
             data.append(item[1])
             labels.append(item[2:])
-        return (np.array(ids), np.array(data), np.array(labels))
+        return (np.array(ids), data, np.array(labels))
 
 
 class NLPCSSDataset(_HatecompDataset):
@@ -52,7 +52,7 @@ class NLPCSSDataset(_HatecompDataset):
             ids.append(item[0])
             data.append(item[1])
             labels.append(item[2:])
-        return (np.array(ids), np.array(data), np.array(labels))
+        return (np.array(ids), data, np.array(labels))
 
 
 if __name__ == "__main__":

@@ -3,50 +3,16 @@ import logging
 import os
 
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import IterableDataset, DataLoader
 import numpy as np
 from torch.utils.data.dataset import Subset
 
-from hatecomp.base.utils import id_collate, tokenize_bookends
+from hatecomp.base.utils import id_collate, tokenize_bookends, batch_and_slice
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
 
-class TokenizedDataset(Dataset):
-    def __init__(self, dataset: Dataset, tokenizer: Callable) -> None:
-        super().__init__()
-
-        self.data = self.tokenize_data(dataset, tokenizer)
-
-    def tokenize_data(self, dataset: Dataset, tokenizer: Callable) -> List:
-        return [self.tokenize_single(item, tokenizer) for item in dataset]
-
-    def tokenize_single(self, item: dict, tokenizer: Callable) -> dict:
-        formatted_item = {"id": item["id"], "label": torch.tensor(item["label"])}
-        formatted_item.update(
-            {
-                key: torch.tensor(value)
-                for key, value in tokenizer(str(item["data"])).items()
-            }
-        )
-        return formatted_item
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, index):
-        return self.data[index]
-
-    def from_huggingface(dataset: Dataset, tokenizer: Callable, max_token_length=512):
-        tokenizer_function = lambda string_in: tokenize_bookends(
-            string_in,
-            max_token_length,
-            lambda x: tokenizer(x, padding="max_length", max_length=max_token_length),
-        )
-        return TokenizedDataset(dataset, tokenizer_function)
-
-
-class _HatecompDataset(Dataset):
+class _HatecompDataset(IterableDataset):
     __name__ = "None"
     DOWNLOADER = None
     DEFAULT_DIRECTORY = None
@@ -89,8 +55,8 @@ class _HatecompDataset(Dataset):
         downloader = self.DOWNLOADER(save_path=path)
         downloader.load()
 
-    def load_data(self, path: str) -> Tuple[np.array, np.array, np.array]:
-        return np.array([]), np.array([]), np.array([])
+    def load_data(self, path: str) -> Tuple[list, list, list]:
+        return list, list, list
 
     def encode_labels(self, encoding_scheme: dict) -> List:
         encoded_labels = []
@@ -98,18 +64,31 @@ class _HatecompDataset(Dataset):
             encoded_labels.append([encoding_scheme[label] for label in labels])
         return encoded_labels
 
+    def map(self, function: Callable, batched: bool = False, batch_size: int = 128):
+        if not batched:
+            batch_size = 1
+
+        for (slice, data_group) in batch_and_slice(self.data, batch_size):
+            mapped_data = function(data_group)
+            assert len(mapped_data) == len(
+                data_group
+            ), "Mapping function did not return output of equal length over input batch!"
+            self.data[slice] = mapped_data
+
+        return self
+
+    def split(self, test_proportion: float = 0.1):
+        n_test = int((1 - test_proportion) * len(self))
+        return torch.utils.data.random_split(self, [len(self) - n_test, n_test])
+
     def __len__(self) -> int:
         return len(self.data)
 
     def __getitem__(self, index: int) -> Tuple:
-        return {
-            "id": self.ids[index],
-            "data": self.data[index],
-            "label": self.labels[index],
-        }
+        return (self.ids[index], self.data[index], self.labels[index])
 
 
 class DataLoader(DataLoader):
     def __init__(self, *args, **kwargs) -> None:
-        kwargs.update({"colate_fn": id_collate})
+        kwargs.update({"collate_fn": id_collate})
         super().__init__(*args, **kwargs)
