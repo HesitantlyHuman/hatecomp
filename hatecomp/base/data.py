@@ -1,5 +1,4 @@
 from typing import Callable, List, Tuple
-
 import logging
 import os
 
@@ -8,11 +7,12 @@ from torch.utils.data import Dataset
 import numpy as np
 from torch.utils.data.dataset import Subset
 
-from hatecomp.base.utils import tokenize_bookends
+from hatecomp.base.utils import id_collate, tokenize_bookends
 
-os.environ['TOKENIZERS_PARALLELISM'] = 'true'
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
-class TokenizerDataset(Dataset):
+
+class TokenizedDataset(Dataset):
     def __init__(self, dataset: Dataset, tokenizer: Callable) -> None:
         super().__init__()
 
@@ -22,30 +22,32 @@ class TokenizerDataset(Dataset):
         return [self.tokenize_single(item, tokenizer) for item in dataset]
 
     def tokenize_single(self, item: dict, tokenizer: Callable) -> dict:
-        formatted_item = {
-            'id' : item['id'],
-            'label' : torch.tensor(item['label'])
-        }
-        formatted_item.update({key: torch.tensor(value) for key, value in tokenizer(str(item['data'])).items()})
+        formatted_item = {"id": item["id"], "label": torch.tensor(item["label"])}
+        formatted_item.update(
+            {
+                key: torch.tensor(value)
+                for key, value in tokenizer(str(item["data"])).items()
+            }
+        )
         return formatted_item
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, index):
-        data_item = self.data[index]
-        return {key : value for key, value in data_item.items() if not key == 'id'}
+        return self.data[index]
 
-    def from_huggingface(dataset: Dataset, tokenizer: Callable, max_token_length = 512):
-        tokenizer_function = lambda string_in : tokenize_bookends(
+    def from_huggingface(dataset: Dataset, tokenizer: Callable, max_token_length=512):
+        tokenizer_function = lambda string_in: tokenize_bookends(
             string_in,
             max_token_length,
-            lambda x : tokenizer(x, padding = 'max_length', max_length = max_token_length)
+            lambda x: tokenizer(x, padding="max_length", max_length=max_token_length),
         )
-        return TokenizerDataset(dataset, tokenizer_function)
+        return TokenizedDataset(dataset, tokenizer_function)
+
 
 class _HatecompDataset(Dataset):
-    __name__ = 'None'
+    __name__ = "None"
     DOWNLOADER = None
     DEFAULT_DIRECTORY = None
     LABEL_ENCODING = None
@@ -53,36 +55,38 @@ class _HatecompDataset(Dataset):
     def __init__(
         self,
         root: str = None,
-        download = False,
+        download=False,
     ):
         if root is None:
             if download:
                 root = self.DEFAULT_DIRECTORY
             else:
-                raise ValueError('root cannot be None if download is False. Either set root to the data root directory or download to True')
-        
+                raise ValueError(
+                    "root cannot be None if download is False. Either set root to the data root directory or download to True"
+                )
+
         self.root = root
         try:
             self.ids, self.data, self.labels = self.load_data(self.root)
         except FileNotFoundError:
-            logging.info(f'{self.__name__} data not found at expected location {self.root}.')
+            logging.info(
+                f"{self.__name__} data not found at expected location {self.root}."
+            )
             if download:
                 self.download(self.root)
                 self.ids, self.data, self.labels = self.load_data(self.root)
             else:
-                raise FileNotFoundError(f'Could not find data at {self.root}')
+                raise FileNotFoundError(f"Could not find data at {self.root}")
         self.labels = self.encode_labels(self.LABEL_ENCODING)
 
-    def split(self, p = 0.9) -> Tuple[Subset, Subset]:
+    def split(self, p=0.9) -> Tuple[Subset, Subset]:
         train_size = int(p * len(self))
         test_size = len(self) - train_size
         return torch.utils.data.random_split(self, [train_size, test_size])
 
     def download(self, path: str):
-        logging.info(f'Downloading {self.__name__} data to location f{path}.')
-        downloader = self.DOWNLOADER(
-            save_path = path
-        )
+        logging.info(f"Downloading {self.__name__} data to location f{path}.")
+        downloader = self.DOWNLOADER(save_path=path)
         downloader.load()
 
     def load_data(self, path: str) -> Tuple[np.array, np.array, np.array]:
@@ -99,7 +103,13 @@ class _HatecompDataset(Dataset):
 
     def __getitem__(self, index: int) -> Tuple:
         return {
-            'id' : self.ids[index], 
-            'data' : self.data[index],
-            'label' : self.labels[index]
+            "id": self.ids[index],
+            "data": self.data[index],
+            "label": self.labels[index],
         }
+
+
+class Dataloader(torch.utils.data.Dataloader):
+    def __init__(self, *args, **kwargs) -> None:
+        kwargs.update({"colate_fn": id_collate})
+        super().__init__(*args, **kwargs)

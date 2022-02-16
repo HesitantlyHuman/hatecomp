@@ -5,26 +5,29 @@ import csv
 
 import numpy as np
 
-from hatecomp.base.dataset import _HatecompDataset
+from hatecomp.base.data import _HatecompDataset
 from hatecomp._path import install_path
 from hatecomp.datasets.HASOC.download import HASOCDownloader
 
+
 class HASOCDataset(_HatecompDataset):
-    __name__ = 'HASOC'
+    __name__ = "HASOC"
     DOWNLOADER = HASOCDownloader
-    DEFAULT_DIRECTORY = DEFAULT_DIRECTORY = os.path.join(install_path, 'datasets/HASOC/data')
+    DEFAULT_DIRECTORY = DEFAULT_DIRECTORY = os.path.join(
+        install_path, "datasets/HASOC/data"
+    )
     LABEL_ENCODING = {
-        'HOF' : 1,
-        'NOT' : 0,
-        'HATE' : 1,
-        'OFFN' : 2,
-        'PRFN' : 3,
-        'TIN' : 1,
-        'UNT' : 2,
-        'NONE' : 0
+        "HOF": 1,
+        "NOT": 0,
+        "HATE": 1,
+        "OFFN": 2,
+        "PRFN": 3,
+        "TIN": 1,
+        "UNT": 2,
+        "NONE": 0,
     }
 
-    CSV_FILE = 'hasoc.csv'
+    CSV_FILE = "hasoc.csv"
 
     def __init__(self, root: str = None, download=False):
         super().__init__(root=root, download=download)
@@ -39,6 +42,7 @@ class HASOCDataset(_HatecompDataset):
             labels.append(item[2:])
         return (np.array(ids), np.array(data), np.array(labels))
 
-if __name__ == '__main__':
-    dataset = HASOCDataset(download = True)
+
+if __name__ == "__main__":
+    dataset = HASOCDataset(download=True)
     print(dataset[600])
