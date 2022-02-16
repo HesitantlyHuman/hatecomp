@@ -1,4 +1,4 @@
-from typing import Callable, List, Tuple
+from typing import Callable, List, Mapping, Tuple
 import logging
 import os
 
@@ -59,10 +59,18 @@ class _HatecompDataset(IterableDataset):
         return list, list, list
 
     def encode_labels(self, encoding_scheme: dict) -> List:
+        num_classes = len(encoding_scheme)
         encoded_labels = []
         for labels in self.labels:
-            encoded_labels.append([encoding_scheme[label] for label in labels])
-        return encoded_labels
+            encoded_labels.append(
+                torch.squeeze(
+                    torch.nn.functional.one_hot(
+                        torch.tensor([encoding_scheme[label] for label in labels]),
+                        num_classes=num_classes,
+                    )
+                )
+            )
+        return torch.cat(encoded_labels, dim=0).float()
 
     def map(self, function: Callable, batched: bool = False, batch_size: int = 128):
         if not batched:
@@ -78,14 +86,23 @@ class _HatecompDataset(IterableDataset):
         return self
 
     def split(self, test_proportion: float = 0.1):
-        n_test = int((1 - test_proportion) * len(self))
+        n_test = int(test_proportion * len(self))
         return torch.utils.data.random_split(self, [len(self) - n_test, n_test])
 
     def __len__(self) -> int:
         return len(self.data)
 
     def __getitem__(self, index: int) -> Tuple:
-        return (self.ids[index], self.data[index], self.labels[index])
+        item = {
+            'id' : self.ids[index],
+            'label' : self.labels[index]
+        }
+        data = self.data[index]
+        if isinstance(data, Mapping):
+            item.update(data)
+        else:
+            item.update({"data" : data})
+        return item
 
 
 class DataLoader(DataLoader):

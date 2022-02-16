@@ -32,7 +32,7 @@ def id_collate(unprocessed_batch):
         batch_without_ids.append((data, label))
         ids.append(id)
     processed_data, processed_labels = default_collate(batch_without_ids)
-    return (ids, processed_data, processed_labels)
+    return (ids, processed_data, processed_labels[0])
 
 
 def batch_and_slice(iterable, batch_size=1):
