@@ -43,6 +43,9 @@ class _HatecompDataset(IterableDataset):
                 self.ids, self.data, self.labels = self.load_data(self.root)
             else:
                 raise FileNotFoundError(f"Could not find data at {self.root}")
+        assert (
+            not self.LABEL_KEY is None
+        ), f"{self.__name__} does not have a LABEL_KEY defined!"
         self.labels = self.encode_labels(self.LABEL_KEY)
 
     def split(self, p: float = 0.9) -> Tuple[Subset, Subset]:
@@ -59,18 +62,12 @@ class _HatecompDataset(IterableDataset):
         return list, list, list
 
     def encode_labels(self, encoding_scheme: dict) -> List:
-        num_classes = len(encoding_scheme)
         encoded_labels = []
         for labels in self.labels:
             encoded_labels.append(
-                torch.squeeze(
-                    torch.nn.functional.one_hot(
-                        torch.tensor([encoding_scheme[label] for label in labels]),
-                        num_classes=num_classes,
-                    )
-                )
+                torch.tensor([encoding_scheme[label] for label in labels])
             )
-        return torch.cat(encoded_labels, dim=0).float()
+        return torch.cat(encoded_labels, dim=0)
 
     def map(self, function: Callable, batched: bool = False, batch_size: int = 128):
         if not batched:
@@ -89,19 +86,19 @@ class _HatecompDataset(IterableDataset):
         n_test = int(test_proportion * len(self))
         return torch.utils.data.random_split(self, [len(self) - n_test, n_test])
 
+    def num_classes(self):
+        return len(self.LABEL_KEY)
+
     def __len__(self) -> int:
         return len(self.data)
 
     def __getitem__(self, index: int) -> Tuple:
-        item = {
-            'id' : self.ids[index],
-            'label' : self.labels[index]
-        }
+        item = {"id": self.ids[index], "label": self.labels[index]}
         data = self.data[index]
         if isinstance(data, Mapping):
             item.update(data)
         else:
-            item.update({"data" : data})
+            item.update({"data": data})
         return item
 
 
