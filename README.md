@@ -110,9 +110,9 @@ Here is a list of results achieved on various datasets with Huggingface models, 
 | [HASOC](https://arxiv.org/pdf/2108.05927.pdf) | F1 (Macro) | 0.53 | NA |
 | [TwitterSexism](https://aclanthology.org/W17-2902.pdf) | F1 (Macro) | 0.87 | **0.99** |
 
-Also note that some of these datasets require tweet data. For these, a large number of tweet_ids return Unauthorized from the twitter API, so the data which the hatecomp models trained on is a subset of the total dataset. More information can be found in the following table:
-
 (If you know of a better SOTA than what is listed here, please create an issue or pull request.)
+
+Also note that some of these datasets require tweet data. For these, a large number of tweet_ids return Unauthorized from the twitter API, so the data which the hatecomp models trained on is a subset of the total dataset. More information can be found in the following table:
 
 | Dataset | Total Size | Successfully Downloaded Tweets | Available Training Portion |
 | -- | -- | -- | -- |
