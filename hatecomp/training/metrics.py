@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.metrics import confusion_matrix
 
 
 def calculate_confusion_matrix(predictions, references, num_classes):
@@ -13,8 +14,8 @@ def calculate_confusion_matrix(predictions, references, num_classes):
 
 def calculate_class_f1(confusion_matrix, class_index):
     true_positive = confusion_matrix[class_index, class_index]
-    false_positive = np.sum(confusion_matrix[class_index, :])
-    false_negative = np.sum(confusion_matrix[:, class_index])
+    false_positive = np.sum(confusion_matrix[class_index, :]) - true_positive
+    false_negative = np.sum(confusion_matrix[:, class_index]) - true_positive
     precision = true_positive / (true_positive + false_positive + 1e-20)
     recall = true_positive / (true_positive + false_negative + 1e-20)
     return (2 * precision * recall) / (precision + recall + 1e-20)
@@ -39,3 +40,15 @@ class F1:
         for class_index in range(self.num_classes):
             f1_scores.append(calculate_class_f1(confusion_matrix, class_index))
         return {"f1": f1_scores}
+
+
+if __name__ == "__main__":
+    confusion_matrix = np.array(
+        [
+            [1245, 293],
+            [195, 2035],
+        ]
+    )
+
+    for index in range(2):
+        print(calculate_class_f1(confusion_matrix, index))
