@@ -1,6 +1,6 @@
 import numpy as np
 from hatecomp.datasets import NAACL, NLPCSS, Vicomtech, TwitterSexism
-from hatecomp.training import HatecompTrainer, HatecompTrainingArgs, Accuracy, F1
+from hatecomp.training import Trainer, TrainingArguments, Accuracy, F1
 from hatecomp.base.utils import tokenize_bookends
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
@@ -58,7 +58,7 @@ def compute_metrics(eval_pred):
 # Finally, create our training arguments, and the trainer itself,
 # then start the training process. This will also checkpoint the model
 # automatically every 500 steps.
-training_args = HatecompTrainingArgs(
+training_args = TrainingArguments(
     output_dir="./results",
     learning_rate=training_config["learning_rate"],
     per_device_train_batch_size=training_config["train_batch_size"],
@@ -70,7 +70,7 @@ training_args = HatecompTrainingArgs(
     warmup_ratio=training_config["warmup_ratio"],
     lr_cycles=training_config["lr_cycles"],
 )
-trainer = HatecompTrainer(
+trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=train_split,
