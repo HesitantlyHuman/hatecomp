@@ -1,8 +1,9 @@
 import numpy as np
 from hatecomp.datasets import NAACL, NLPCSS, Vicomtech, TwitterSexism
 from hatecomp.training import HatecompTrainer, HatecompTrainingArgs, Accuracy, F1
+from hatecomp.models import AutoModelForSequenceClassification
 from hatecomp.base.utils import tokenize_bookends
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer
 
 # Set the basic training parameters we will use in this run
 training_config = {
@@ -19,7 +20,8 @@ training_config = {
 }
 
 # Import a raw hatecomp dataset
-raw_dataset = TwitterSexism()
+raw_dataset = NAACL()
+print(raw_dataset[0])
 
 # Use the huggingface auto classes to load a transformer and
 # This will also configure the classification head for

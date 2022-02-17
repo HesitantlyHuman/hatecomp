@@ -40,15 +40,3 @@ class F1:
         for class_index in range(self.num_classes):
             f1_scores.append(calculate_class_f1(confusion_matrix, class_index))
         return {"f1": f1_scores}
-
-
-if __name__ == "__main__":
-    confusion_matrix = np.array(
-        [
-            [1245, 293],
-            [195, 2035],
-        ]
-    )
-
-    for index in range(2):
-        print(calculate_class_f1(confusion_matrix, index))

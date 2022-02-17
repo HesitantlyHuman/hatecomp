@@ -65,9 +65,11 @@ class _HatecompDataset(IterableDataset):
         encoded_labels = []
         for labels in self.labels:
             encoded_labels.append(
-                torch.tensor([encoding_scheme[label] for label in labels])
+                torch.squeeze(
+                    torch.tensor([encoding_scheme[label] for label in labels])
+                )
             )
-        return torch.cat(encoded_labels, dim=0)
+        return torch.stack(encoded_labels, dim=0)
 
     def map(self, function: Callable, batched: bool = False, batch_size: int = 128):
         if not batched:

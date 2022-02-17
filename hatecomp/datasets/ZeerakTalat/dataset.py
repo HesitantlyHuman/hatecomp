@@ -53,14 +53,3 @@ class NLPCSSDataset(_HatecompDataset):
             data.append(item[1])
             labels.append(item[2:])
         return (np.array(ids), data, np.array(labels))
-
-
-if __name__ == "__main__":
-    dataset = NAACLDataset(download=True)
-    train, test = dataset.split()
-    print(train[0])
-    print(test[0])
-    dataset = NLPCSSDataset(download=True)
-    train, test = dataset.split()
-    print(train[0])
-    print(test[0])
