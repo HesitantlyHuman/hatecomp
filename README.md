@@ -29,9 +29,7 @@ The datasets collected which contain annotated or labeled english text are the f
 - ZeerakW Twitter Dataset
 - Vicomtech Hate Speech Dataset
 
-Of those, the `"UB Web Datasets/Twitter Harassment"`, `ZeerakW Twitter Dataset` and `Sexism Dataset` require downloading Tweet content from Twitter.
-
-Additionally, the `MLMA Dataset` and `Online Intervention Dataset` only contain hateful posts, instead labelling other features such as the target of hate.
+Of those the `MLMA Dataset` and `Online Intervention Dataset` only contain hateful posts, instead labelling other features such as the target of hate.
 
 # Training
 `hatecomp` provides some basic training tools to integrate into the [huggingface]() :hugs: Trainer API. A full example of how to train a model using the hatecomp datasets can be found in `train.py`
@@ -42,7 +40,7 @@ Here is a list of results acheived on various datasets with Huggingface models, 
 | Dataset | Metric | SOTA | hatecomp/huggingface |
 | -- | -- | -- | -- |
 | [Vicomtech](https://arxiv.org/pdf/1809.04444.pdf) | Accuracy | 0.79 | **0.93** |
-| [ZeerakTalat-NAACL](https://aclanthology.org/N16-2013.pdf) | F1 | 0.74 | NA |
-| [ZeerakTalat-NLPCSS](https://aclanthology.org/W16-5618.pdf) | F1 | [0.86, 0.92] | NA |
+| [ZeerakTalat-NAACL](https://aclanthology.org/N16-2013.pdf) | F1 | **0.74** | 0.45 |
+| [ZeerakTalat-NLPCSS](https://aclanthology.org/W16-5618.pdf) | F1 | 0.53 | NA |
 | [HASOC](https://arxiv.org/pdf/2108.05927.pdf) | F1 (Macro) | 0.53 | NA |
 | [TwitterSexism](https://aclanthology.org/W17-2902.pdf) | F1 (Macro) | 0.87 | NA |

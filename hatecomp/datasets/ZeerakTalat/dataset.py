@@ -14,7 +14,7 @@ from hatecomp.datasets.ZeerakTalat.download import NAACLDownloader, NLPCSSDownlo
 class NAACLDataset(_HatecompDataset):
     __name__ = "NAACL"
     DOWNLOADER = NAACLDownloader
-    DEFAULT_DIRECTORY = os.path.join(install_path, "datasets/ZeerakW/data")
+    DEFAULT_DIRECTORY = os.path.join(install_path, "datasets/ZeerakTalat/data")
 
     CSV_FILE = "NAACL_SRW_2016.csv"
     LABEL_KEY = {"none": 0, "racism": 1, "sexism": 2}
@@ -36,15 +36,15 @@ class NAACLDataset(_HatecompDataset):
 class NLPCSSDataset(_HatecompDataset):
     __name__ = "NLPCSS"
     DOWNLOADER = NLPCSSDownloader
-    DEFAULT_DIRECTORY = os.path.join(install_path, "datasets/ZeerakW/data")
+    DEFAULT_DIRECTORY = os.path.join(install_path, "datasets/ZeerakTalat/data")
 
     CSV_FILE = "NLP%2BCSS_2016.csv"
-    LABEL_KEY = {"none": 0, "racism": 1, "sexism": 2}
+    LABEL_KEY = {"neither": 0, "link": 0, "racism": 1, "sexism": 2, "both": 3}
 
     def __init__(self, root: str = None, download: bool = True):
         super().__init__(root=root, download=download)
 
-    def _load_data(self, path: str) -> Tuple[List]:
+    def load_data(self, path: str) -> Tuple[List]:
         with open(os.path.join(path, self.CSV_FILE)) as data_file:
             csv_data = list(csv.reader(data_file))
         ids, data, labels = [], [], []
