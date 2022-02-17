@@ -7,7 +7,7 @@ from transformers import AutoModelForSequenceClassification
 class HatecompAutoModelForSequenceClassification(AutoModelForSequenceClassification):
     def from_pretrained(transformer_name: str, num_labels: int):
         model = AutoModelForSequenceClassification.from_pretrained(
-            transformer_name, num_labels=num_labels
+            transformer_name, num_labels=1
         )
         if isinstance(num_labels, int):
             model.config.multiheaded = False
@@ -17,6 +17,20 @@ class HatecompAutoModelForSequenceClassification(AutoModelForSequenceClassificat
             else:
                 model.config.multiheaded = False
         elif isinstance(num_labels, torch.Tensor):
-            
+            if len(num_labels.shape) == 0:
+                model.config.multiheaded = False
+            else:
+                model.config.multiheaded = True
+        else:
+            model.config.multiheaded = False
 
-        print(model.classification_head)
+        if model.config.multiheaded:
+            model = HatecompAutoModelForSequenceClassification.recapitate(
+                model, num_labels=num_labels
+            )
+
+        return model
+
+    # TODO
+    def recapitate(model, num_labels):
+        return model
