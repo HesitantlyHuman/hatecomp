@@ -1,8 +1,7 @@
 import numpy as np
-from hatecomp import NAACL, Vicomtech
-from hatecomp.base.training import HatecompTrainer, HatecompTrainingArgs
+from hatecomp.datasets import NAACL, Vicomtech
+from hatecomp.training import HatecompTrainer, HatecompTrainingArgs, Accuracy, F1
 from hatecomp.base.utils import tokenize_bookends
-from hatecomp.base.metrics import Accuracy, F1
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 # Set the basic training parameters we will use in this run
@@ -20,7 +19,7 @@ training_config = {
 }
 
 # Import a raw hatecomp dataset
-raw_dataset = Vicomtech()
+raw_dataset = NAACL()
 
 # Use the huggingface auto classes to load a transformer and
 # This will also configure the classification head for
