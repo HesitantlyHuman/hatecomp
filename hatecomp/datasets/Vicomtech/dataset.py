@@ -18,9 +18,7 @@ class VicomtechDataset(_HatecompDataset):
     CSV_FILE = "vicomtech.csv"
     LABEL_KEY = {
         "noHate": 0,
-        "idk/skip": 1,
-        "relation": 1,
-        "hate": 2,
+        "hate": 1,
     }
 
     def __init__(self, root: str = None, download: bool = True):

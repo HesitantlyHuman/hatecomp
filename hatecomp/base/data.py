@@ -87,7 +87,7 @@ class _HatecompDataset(IterableDataset):
         return torch.utils.data.random_split(self, [len(self) - n_test, n_test])
 
     def num_classes(self):
-        return len(self.LABEL_KEY)
+        return len(set(self.LABEL_KEY.values()))
 
     def __len__(self) -> int:
         return len(self.data)
