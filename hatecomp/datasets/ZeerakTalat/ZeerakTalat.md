@@ -1,7 +1,7 @@
 TITLE: Hate Speech Twitter annotations
 
 PAPER: http://www.aclweb.org/anthology/N16-2013, http://aclweb.org/anthology/W16-5618
-DATA: https://github.com/ZeerakW/hatespeech
+DATA: https://github.com/ZeerakTalat/hatespeech
 FORMAT: csv
 LANGUAGE: english
 ABOUT: Contains Tweet IDs and annotations for the presence of hate speech in the given tweet.

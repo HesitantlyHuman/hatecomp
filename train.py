@@ -7,13 +7,13 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 # Set the basic training parameters we will use in this run
 training_config = {
-    "epochs": 5,
+    "epochs": 3,
     "train_batch_size": 16,
     "eval_batch_size": 128,
     "dataloader_workers": 12,
     "test_proportion": 0.1,
     "learning_rate": 2e-5,
-    "weight_decay": 0.05,
+    "weight_decay": 0.1,
     "warmup_ratio": 0.05,
     "lr_cycles": 2,
     "transformer_model": "roberta-base",

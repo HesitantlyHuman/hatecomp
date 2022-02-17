@@ -37,9 +37,12 @@ Additionally, the `MLMA Dataset` and `Online Intervention Dataset` only contain 
 `hatecomp` provides some basic training tools to integrate into the [huggingface]() :hugs: Trainer API. A full example of how to train a model using the hatecomp datasets can be found in `train.py`
 
 ## Results
-Here is a list of results acheived on various datasets with Huggingface models, along with the SOTA performance (as best I could find). Since it is not always possible to find SOTA scores for obscure datsets measured with a particular metric, the hatecomp score is selected to match whatever SOTA could be found.
+Here is a list of results acheived on various datasets with Huggingface models, along with the SOTA performance (as best I could find). Since it is not always possible to find SOTA scores for obscure datsets measured with a particular metric, the hatecomp score is selected to match whatever SOTA could be found. (The links are locations where the SOTA reference was found. If you are looking for citations, please refer to teh `About.md` for each dataset)
 
 | Dataset | Metric | SOTA | hatecomp/huggingface |
 | -- | -- | -- | -- |
-| [Vicomtech](https://arxiv.org/pdf/1809.04444.pdf) | Accuracy | 0.79 | 0.91 |
-| [Zeerak]
+| [Vicomtech](https://arxiv.org/pdf/1809.04444.pdf) | Accuracy | 0.79 | **0.93** |
+| [ZeerakTalat-NAACL](https://aclanthology.org/N16-2013.pdf) | F1 | 0.74 | NA |
+| [ZeerakTalat-NLPCSS](https://aclanthology.org/W16-5618.pdf) | F1 | [0.86, 0.92] | NA |
+| [HASOC](https://arxiv.org/pdf/2108.05927.pdf) | F1 (Macro) | 0.53 | NA |
+| [TwitterSexism](https://aclanthology.org/W17-2902.pdf) | F1 (Macro) | 0.87 | NA |
