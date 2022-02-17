@@ -1,5 +1,5 @@
 import numpy as np
-from hatecomp.datasets import NAACL, NLPCSS, Vicomtech
+from hatecomp.datasets import NAACL, NLPCSS, Vicomtech, TwitterSexism
 from hatecomp.training import HatecompTrainer, HatecompTrainingArgs, Accuracy, F1
 from hatecomp.base.utils import tokenize_bookends
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -19,7 +19,7 @@ training_config = {
 }
 
 # Import a raw hatecomp dataset
-raw_dataset = NLPCSS()
+raw_dataset = TwitterSexism()
 
 print(raw_dataset[1204])
 
