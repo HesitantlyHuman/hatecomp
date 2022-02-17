@@ -1,12 +1,12 @@
 import numpy as np
-from hatecomp import NAACL
+from hatecomp import NAACL, Vicomtech
 from hatecomp.base.training import HatecompTrainer
 from hatecomp.base.utils import tokenize_bookends
 from hatecomp.base.metrics import Accuracy, F1
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from transformers import TrainingArguments
 
-raw_dataset = NAACL()
+raw_dataset = Vicomtech()
 
 huggingface_model = "roberta-base"
 
