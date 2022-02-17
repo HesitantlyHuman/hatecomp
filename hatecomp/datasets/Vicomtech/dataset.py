@@ -19,6 +19,7 @@ class VicomtechDataset(_HatecompDataset):
     LABEL_KEY = {
         "noHate": 0,
         "idk/skip": 1,
+        "relation": 1,
         "hate": 2,
     }
 
