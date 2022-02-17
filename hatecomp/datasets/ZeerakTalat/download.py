@@ -19,9 +19,12 @@ class NAACLDownloader(_CSVDownloader):
         with TweetDownloader() as tweet_downloader:
             tweets = tweet_downloader.download(ids)
         updated_NAACL_csv = []
-        for item, tweet in zip(NAACL_csv, tweets):
-            item = ["ZeerakW_NAACL-" + item[0], tweet, item[1]]
-            updated_NAACL_csv.append(item)
+        for item in NAACL_csv:
+            try:
+                item = ["ZeerakW_NAACL-" + item[0], tweets[item[0]], item[1]]
+                updated_NAACL_csv.append(item)
+            except KeyError:
+                pass
         with open(self.SAVE_PATHS[self.DOWNLOAD_URL], "w") as NAACL_file:
             writer = csv.writer(NAACL_file)
             writer.writerow(["id", "data", "hate_type"])
@@ -57,16 +60,19 @@ class NLPCSSDownloader(_CSVDownloader):
 
         # Create a new csv with the tweet content and pooled ratings
         updated_NLPCSS_csv = []
-        for item, tweet in zip(NLPCSS_csv[1:], tweets):
+        for item in NLPCSS_csv[1:]:
             amateur_vote = NLPCSSDownloader.get_vote(item, amateur_indices)
             expert_vote = NLPCSSDownloader.get_vote(item, expert_indices)
-            item = [
-                "ZeerakW_NLPCSS-" + item[0],
-                tweet,
-                expert_vote,
-                amateur_vote,
-            ]
-            updated_NLPCSS_csv.append(item)
+            try:
+                item = [
+                    "ZeerakW_NLPCSS-" + item[0],
+                    tweets[item[0]],
+                    expert_vote,
+                    amateur_vote,
+                ]
+                updated_NLPCSS_csv.append(item)
+            except KeyError:
+                pass
 
         # Save the new csv over the old one
         with open(self.SAVE_PATHS[self.DOWNLOAD_URL], "w") as NLPCSS_file:

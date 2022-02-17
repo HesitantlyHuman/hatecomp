@@ -1,40 +1,27 @@
 # Hate Datasets Compilation
 Contains 17 different hate, violence, and discrimination speech datasets, along with anotations on where they were found, the data format and method for collection and labeling. Each dataset is kept in the original file structure and placed inside the respective folder's `data` file, in case a more recent version is obtained. (Links for the source are in each ABOUT.md file)
 
-# Using
+## Using
 [TODO]: Detail how to download and use
 
-# Datasets
+## Datasets
 Additional information about each dataset can be found the corresponding ABOUT.md file. 
 
-## Working
-Currently only the following datasets are implemented:
-- ZeerakW
+### Working
+Currently the following datasets are implemented:
+- ZeerakTalat NAACL
+- ZeerakTalat NLPCSS
 - HASOC
 - Vicomtech
 
-## Useful Dataset
-The datasets collected which contain annotated or labeled english text are the following:
-- Iron March Dataset
-- Sexism Dataset
-- UB Web Datasets
-    - Facebook Comments
-    - League of Legends
-    - World of Warcraft
-    - Twitter Harassment
-- Wikipedia Talk
-- Online Intervention Dataset
-- MLMA Dataset
-- HASOC English Dataset
-- ZeerakW Twitter Dataset
-- Vicomtech Hate Speech Dataset
+### Notes
 
 Of those the `MLMA Dataset` and `Online Intervention Dataset` only contain hateful posts, instead labelling other features such as the target of hate.
 
-# Training
-`hatecomp` provides some basic training tools to integrate into the [huggingface]() :hugs: Trainer API. A full example of how to train a model using the hatecomp datasets can be found in `train.py`
+## Training
+`hatecomp` provides some basic training tools to integrate into the [huggingface](https://github.com/huggingface) :hugs: Trainer API. A full example of how to train a model using the hatecomp datasets can be found in `train.py`
 
-## Results
+### Results
 Here is a list of results acheived on various datasets with Huggingface models, along with the SOTA performance (as best I could find). Since it is not always possible to find SOTA scores for obscure datsets measured with a particular metric, the hatecomp score is selected to match whatever SOTA could be found. (The links are locations where the SOTA reference was found. If you are looking for citations, please refer to teh `About.md` for each dataset)
 
 | Dataset | Metric | SOTA | hatecomp/huggingface |
@@ -44,3 +31,14 @@ Here is a list of results acheived on various datasets with Huggingface models, 
 | [ZeerakTalat-NLPCSS](https://aclanthology.org/W16-5618.pdf) | F1 | 0.53 | NA |
 | [HASOC](https://arxiv.org/pdf/2108.05927.pdf) | F1 (Macro) | 0.53 | NA |
 | [TwitterSexism](https://aclanthology.org/W17-2902.pdf) | F1 (Macro) | 0.87 | NA |
+
+Also note that some of these datasets require tweet data. For these, a large number of tweet_ids return Unauthorized from the twitter API, so the data which the hatecomp models trained on is a subset of the total dataset. More information can be found in the following table:
+
+| Dataset | Total Size | Successfully Downloaded Tweets | Available Training Portion |
+| -- | -- | -- | -- |
+| TwitterSexism | 10583 | 5054 | 0.4775 |
+
+This info is valid as of Feb 2022, and is probably subject to change as Twitter continues to lock down their API.
+
+## TODO
+Implement a multi-task model, both for datasets with multiple tasks, and for the entire collection of datasets.

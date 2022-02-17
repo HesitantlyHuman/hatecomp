@@ -10,7 +10,7 @@ training_config = {
     "train_batch_size": 16,
     "eval_batch_size": 128,
     "dataloader_workers": 12,
-    "test_proportion": 0.1,
+    "test_proportion": 0.3,
     "learning_rate": 2e-5,
     "weight_decay": 0.1,
     "warmup_ratio": 0.05,
@@ -20,8 +20,6 @@ training_config = {
 
 # Import a raw hatecomp dataset
 raw_dataset = TwitterSexism()
-
-print(raw_dataset[1204])
 
 # Use the huggingface auto classes to load a transformer and
 # This will also configure the classification head for

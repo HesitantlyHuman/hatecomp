@@ -30,7 +30,7 @@ class TweetDownloader:
 
     async def download_async(self, tweet_ids):
         print("Downloading tweets...")
-        tweets = []
+        tweets = {}
         progress_bar = tqdm(total=len(tweet_ids))
         async with httpx.AsyncClient(timeout=30) as session:
             chunks = TweetDownloader.chunk_list(tweet_ids, 100)
@@ -41,7 +41,8 @@ class TweetDownloader:
                 max_per_second=2,
             ) as chunk_results:
                 async for tweet_results in chunk_results:
-                    tweets = tweets + tweet_results
+                    for tweet_id, tweet_content in tweet_results:
+                        tweets[tweet_id] = tweet_content
         return tweets
 
     async def _download_helper(self, session, progress_bar, chunk):
@@ -58,6 +59,7 @@ class TweetDownloader:
         return tweets
 
     async def download_batch(self, session, tweet_ids):
+        input_type = type(tweet_ids[0])
         query = {"id": ",".join([str(tweet_id) for tweet_id in tweet_ids])}
         response = await session.get(
             url=self.endpoint,
@@ -66,7 +68,10 @@ class TweetDownloader:
         )
         api_data = json.loads(response.text)
         try:
-            return [tweet_data["text"] for tweet_data in api_data]
+            return [
+                (input_type(tweet_data["id"]), tweet_data["text"])
+                for tweet_data in api_data
+            ]
         except TypeError as e:
             try:
                 if (
@@ -117,4 +122,10 @@ class TooFast(Exception):
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
     downloader = TweetDownloader()
-    print(downloader.download(["572348198062170112"]))
+    print(
+        downloader.download(
+            [
+                "572348198062170112",
+            ]
+        )
+    )

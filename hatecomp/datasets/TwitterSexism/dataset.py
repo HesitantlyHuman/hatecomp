@@ -17,7 +17,7 @@ class TwitterSexismDataset(_HatecompDataset):
     DEFAULT_DIRECTORY = os.path.join(install_path, "datasets/TwitterSexism/data")
 
     CSV_FILE = "twitter_sexism.csv"
-    LABEL_KEY = {"none": 0, "benevolent": 1, "hostile": 2}
+    LABEL_KEY = {"benevolent": 0, "hostile": 1}
 
     def __init__(self, root: str = None, download: bool = True):
         super().__init__(root=root, download=download)
