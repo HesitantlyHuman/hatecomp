@@ -4,7 +4,7 @@ import torch
 from transformers import AutoModelForSequenceClassification
 
 # Copied from the huggingface RobertaClassificationHead
-class ClassificationHead(torch.nn.Module):
+class HatecompClassificationHead(torch.nn.Module):
     def __init__(self, config, num_classes):
         super().__init__()
         self.dense = torch.nn.Linear(config.hidden_size, config.hidden_size)
@@ -54,7 +54,7 @@ class HatecompAutoModelForSequenceClassification(AutoModelForSequenceClassificat
     def recapitate(model, num_labels):
         model.classifier = torch.nn.ModuleList(
             [
-                ClassificationHead(model.config, num_classes)
+                HatecompClassificationHead(model.config, num_classes)
                 for num_classes in num_labels
             ]
         )

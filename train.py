@@ -21,6 +21,7 @@ training_config = {
 
 # Import a raw hatecomp dataset
 raw_dataset = NLPCSS()
+num_classes = raw_dataset.num_classes
 print(raw_dataset.num_classes)
 
 # Use the huggingface auto classes to load a transformer and
@@ -28,7 +29,7 @@ print(raw_dataset.num_classes)
 # the correct number of classes.
 tokenizer = AutoTokenizer.from_pretrained(training_config["transformer_model"])
 model = AutoModelForSequenceClassification.from_pretrained(
-    training_config["transformer_model"], num_labels=raw_dataset.num_classes
+    training_config["transformer_model"], num_labels=num_classes
 )
 
 # Create a tokenizer function that will tokenize to the model's max size
