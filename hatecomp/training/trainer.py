@@ -5,10 +5,7 @@ import torch
 from transformers.trainer import Trainer, TrainingArguments
 from torch.utils.data import DataLoader
 from hatecomp.base.utils import get_class_weights
-from transformers.optimization import (
-    AdamW,
-    get_cosine_with_hard_restarts_schedule_with_warmup,
-)
+from transformers.optimization import get_cosine_with_hard_restarts_schedule_with_warmup
 
 
 @dataclass
@@ -34,10 +31,12 @@ class HatecompTrainer(Trainer):
         labels = inputs.get("labels")
 
         outputs = model(**inputs)
-        logits = outputs.get("logits")
+        logits = outputs[0].get("logits")
 
-        loss_fct = torch.nn.CrossEntropyLoss(weight=self.class_weights)
-        loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
+        loss_fct = torch.nn.CrossEntropyLoss(weight=self.class_weights[0])
+        loss = loss_fct(
+            logits.view(-1, self.model.config.num_labels[0]), labels.view(-1)
+        )
         return (loss, outputs) if return_outputs else loss
 
     def create_scheduler(

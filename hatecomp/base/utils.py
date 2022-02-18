@@ -46,11 +46,17 @@ def get_class_weights(dataset, n_classes):
     label_counts = torch.zeros((len(n_classes), max(n_classes)))
     for batch in dataset:
         labels = batch["label"]
+
         if isinstance(labels, torch.Tensor):
             labels = labels.long()
         else:
             labels = torch.tensor(labels).long()
-        for idx, label in enumerate(labels):
-            label_counts[idx, label] += 1
+
+        if len(labels.shape) == 0:
+            label_counts[0, labels] += 1
+        else:
+            for idx, label in enumerate(labels):
+                label_counts[idx, label] += 1
+
     inverted_classes = 1 / label_counts
     return inverted_classes / torch.mean(inverted_classes)

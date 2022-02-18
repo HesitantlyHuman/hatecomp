@@ -2,6 +2,7 @@ from typing import List
 import torch
 from transformers import AutoModelForSequenceClassification
 from transformers.configuration_utils import PretrainedConfig
+from transformers.modeling_outputs import SequenceClassifierOutput
 
 
 class HatecompConfig:
@@ -33,8 +34,21 @@ class HatecompMultiheaded(torch.nn.Module):
         self.config = config
 
     def forward(self, *args, **kwargs):
+        kwargs = {
+            parameter: value
+            for parameter, value in kwargs.items()
+            if not parameter == "labels"
+        }
         base_outputs = self.base(*args, **kwargs)
-        return [head(base_outputs) for head in self.heads]
+        return [
+            SequenceClassifierOutput(
+                loss=None,
+                logits=head(base_outputs),
+                hidden_states=base_outputs.hidden_states,
+                attentions=base_outputs.attentions,
+            )
+            for head in self.heads
+        ]
 
 
 # Copied from the huggingface RobertaClassificationHead

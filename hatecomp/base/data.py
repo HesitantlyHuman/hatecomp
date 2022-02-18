@@ -1,4 +1,4 @@
-from typing import Callable, List, Mapping, Tuple
+from typing import Callable, List, Mapping, Tuple, Union
 import logging
 import os
 
@@ -94,14 +94,23 @@ class _HatecompDataset(IterableDataset):
     def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(self, index: int) -> Tuple:
-        item = {"id": self.ids[index], "label": self.labels[index]}
-        data = self.data[index]
-        if isinstance(data, Mapping):
-            item.update(data)
+    def __getitem__(self, index: Union[int, slice]) -> Tuple:
+        # TODO Create some sort of dataset view class to avoid this data duplication
+        if isinstance(index, slice):
+            dataset_class = type(self)
+            dataset_view = dataset_class.__new__(dataset_class)
+            dataset_view.ids = self.ids[index]
+            dataset_view.data = self.data[index]
+            dataset_view.labels = self.labels[index]
+            return dataset_view
         else:
-            item.update({"data": data})
-        return item
+            item = {"id": self.ids[index], "label": self.labels[index]}
+            data = self.data[index]
+            if isinstance(data, Mapping):
+                item.update(data)
+            else:
+                item.update({"data": data})
+            return item
 
 
 class DataLoader(DataLoader):

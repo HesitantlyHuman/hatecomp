@@ -21,7 +21,7 @@ training_config = {
 }
 
 # Import a raw hatecomp dataset
-raw_dataset = NLPCSS()
+raw_dataset = NAACL()
 num_classes = raw_dataset.num_classes
 
 # Use the huggingface auto classes to load a transformer and
@@ -39,7 +39,7 @@ model = AutoModelForSequenceClassification.from_pretrained(
 tokenizer_function = lambda tokenization_input: tokenize_bookends(
     tokenization_input, model.config.max_position_embeddings, tokenizer
 )
-tokenized_dataset = raw_dataset.map(tokenizer_function, batched=True)
+tokenized_dataset = raw_dataset.map(tokenizer_function, batched=True)[:200]
 train_split, test_split = tokenized_dataset.split(training_config["test_proportion"])
 
 # Create a function to compute our accuracy and F1 metrics
@@ -47,6 +47,7 @@ metrics = [Accuracy(), F1(num_classes)]
 
 
 def compute_metrics(eval_pred):
+    print(eval_pred)
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
     metric_outputs = {}
