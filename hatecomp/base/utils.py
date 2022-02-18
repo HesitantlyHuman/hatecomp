@@ -1,5 +1,4 @@
 from typing import Callable
-from numpy import isin
 import torch
 from torch.utils.data.dataloader import default_collate
 
@@ -44,13 +43,14 @@ def batch_and_slice(iterable, batch_size=1):
 
 
 def get_class_weights(dataset, n_classes):
-    label_counts = torch.zeros(n_classes)
+    label_counts = torch.zeros((len(n_classes), max(n_classes)))
     for batch in dataset:
-        label = batch["label"]
-        if isinstance(label, torch.Tensor):
-            label_index = label.long()
+        labels = batch["label"]
+        if isinstance(labels, torch.Tensor):
+            labels = labels.long()
         else:
-            label_index = torch.tensor(label).long()
-        label_counts[label_index] += 1
-    average_class_instances = torch.mean(label_counts)
-    return label_counts / average_class_instances
+            labels = torch.tensor(labels).long()
+        for idx, label in enumerate(labels):
+            label_counts[idx, label] += 1
+    inverted_classes = 1 / label_counts
+    return inverted_classes / torch.mean(inverted_classes)

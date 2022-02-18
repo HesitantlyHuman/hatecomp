@@ -1,7 +1,41 @@
-# Use the implementation of https://github.com/shahrukhx01/multitask-learning-transformers/tree/main/multiple_prediction_heads to allow for multitask
-# Figure out how to update the datasets which have multiple tasks for this
+from typing import List
 import torch
 from transformers import AutoModelForSequenceClassification
+from transformers.configuration_utils import PretrainedConfig
+
+
+class HatecompConfig:
+    OVERRIDDEN_ATTRIBUTES = ["num_labels"]
+
+    def __init__(self, config: PretrainedConfig):
+        self.config = config
+
+    def ___setattr__(self, key, value):
+        if key in self.OVERRIDDEN_ATTRIBUTES:
+            super().__setattr__(key, value)
+        else:
+            self.config.__setattr__(key, value)
+
+    def __getattr__(self, key):
+        if key in self.OVERRIDDEN_ATTRIBUTES:
+            return getattr(self, key)
+        else:
+            return getattr(self.config, key)
+
+
+class HatecompMultiheaded(torch.nn.Module):
+    def __init__(
+        self, base_model: torch.nn.Module, heads: List[torch.nn.Module], config
+    ):
+        super().__init__()
+        self.base = base_model
+        self.heads = torch.nn.ModuleList(heads)
+        self.config = config
+
+    def forward(self, *args, **kwargs):
+        base_outputs = self.base(*args, **kwargs)
+        return [head(base_outputs) for head in self.heads]
+
 
 # Copied from the huggingface RobertaClassificationHead
 class HatecompClassificationHead(torch.nn.Module):
@@ -17,7 +51,7 @@ class HatecompClassificationHead(torch.nn.Module):
         self.out_proj = torch.nn.Linear(config.hidden_size, num_classes)
 
     def forward(self, features, **kwargs):
-        x = features[:, 0, :]
+        x = features[0][:, 0, :]
         x = self.dropout(x)
         x = self.dense(x)
         x = torch.tanh(x)
@@ -27,7 +61,7 @@ class HatecompClassificationHead(torch.nn.Module):
 
 
 class HatecompAutoModelForSequenceClassification(AutoModelForSequenceClassification):
-    def from_pretrained(transformer_name: str, num_labels: int):
+    def from_pretrained(transformer_name: str, num_labels: List[int]):
         model = AutoModelForSequenceClassification.from_pretrained(
             transformer_name, num_labels=1
         )
@@ -52,10 +86,13 @@ class HatecompAutoModelForSequenceClassification(AutoModelForSequenceClassificat
         return model
 
     def recapitate(model, num_labels):
-        model.classifier = torch.nn.ModuleList(
+        config = HatecompConfig(model.config)
+        config.num_labels = num_labels
+        classifiers = torch.nn.ModuleList(
             [
-                HatecompClassificationHead(model.config, num_classes)
+                HatecompClassificationHead(config, num_classes)
                 for num_classes in num_labels
             ]
         )
-        return model
+        base_model = getattr(model, model.base_model_prefix)
+        return HatecompMultiheaded(base_model, classifiers, config)

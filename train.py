@@ -14,6 +14,7 @@ training_config = {
     "test_proportion": 0.3,
     "learning_rate": 2e-5,
     "weight_decay": 0.1,
+    "dropout": 0.2,  # Figure out how this is supposed to plumb through
     "warmup_ratio": 0.05,
     "lr_cycles": 2,
     "transformer_model": "roberta-base",
@@ -22,7 +23,6 @@ training_config = {
 # Import a raw hatecomp dataset
 raw_dataset = NLPCSS()
 num_classes = raw_dataset.num_classes
-print(raw_dataset.num_classes)
 
 # Use the huggingface auto classes to load a transformer and
 # This will also configure the classification head for

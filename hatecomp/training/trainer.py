@@ -40,16 +40,6 @@ class HatecompTrainer(Trainer):
         loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
         return (loss, outputs) if return_outputs else loss
 
-    # def create_optimizer(self):
-    #     optimizer_cls, optimizer_kwargs = Trainer.get_optimizer_cls_and_kwargs(
-    #         self.args
-    #     )
-    #     self.optimizer = optimizer_cls(
-    #         self.model.parameters(),
-    #         **optimizer_kwargs,
-    #     )
-    #     return self.optimizer
-
     def create_scheduler(
         self, num_training_steps: int, optimizer: torch.optim.Optimizer = None
     ):
