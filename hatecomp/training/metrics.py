@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.metrics import confusion_matrix
 
 
 def calculate_confusion_matrix(predictions, references, num_classes):

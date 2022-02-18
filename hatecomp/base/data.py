@@ -62,14 +62,17 @@ class _HatecompDataset(IterableDataset):
         return list, list, list
 
     def encode_labels(self, encoding_scheme: dict) -> List:
-        encoded_labels = []
+        class_values = [set() for i in self.labels[0]]
+        encoded_muliclass = []
         for labels in self.labels:
-            encoded_labels.append(
-                torch.squeeze(
-                    torch.tensor([encoding_scheme[label] for label in labels])
-                )
-            )
-        return torch.stack(encoded_labels, dim=0)
+            encoded_example = []
+            for idx, label in enumerate(labels):
+                encoded_label = encoding_scheme[label]
+                class_values[idx].add(encoded_label)
+                encoded_example.append(encoded_label)
+            encoded_muliclass.append(torch.squeeze(torch.tensor(encoded_example)))
+        self.num_classes = [len(class_options) for class_options in class_values]
+        return torch.stack(encoded_muliclass, dim=0)
 
     def map(self, function: Callable, batched: bool = False, batch_size: int = 128):
         if not batched:
@@ -87,9 +90,6 @@ class _HatecompDataset(IterableDataset):
     def split(self, test_proportion: float = 0.1):
         n_test = int(test_proportion * len(self))
         return torch.utils.data.random_split(self, [len(self) - n_test, n_test])
-
-    def num_classes(self):
-        return len(set(self.LABEL_KEY.values()))
 
     def __len__(self) -> int:
         return len(self.data)
