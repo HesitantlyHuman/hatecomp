@@ -133,13 +133,21 @@ class HatecompTrainer(Trainer):
         labels = inputs.get("labels")
 
         outputs = model(**inputs)
-        logits = outputs[0].get("logits")
 
-        loss_fct = torch.nn.CrossEntropyLoss(weight=self.class_weights[0])
-        loss = loss_fct(
-            logits.view(-1, self.model.config.num_labels[0]), labels.view(-1)
+        losses = []
+        for task_idx, task_outputs in enumerate(outputs):
+            logits = task_outputs.get("logits")
+
+            loss_fct = torch.nn.CrossEntropyLoss(weight=self.class_weights[task_idx])
+            loss = loss_fct(
+                logits.view(-1, self.model.config.num_labels[task_idx]), labels.view(-1)
+            )
+            losses.append(loss)
+        return (
+            (torch.sum(torch.stack(losses)), outputs)
+            if return_outputs
+            else torch.sum(torch.stack(losses))
         )
-        return (loss, outputs) if return_outputs else loss
 
     def create_scheduler(
         self, num_training_steps: int, optimizer: torch.optim.Optimizer = None

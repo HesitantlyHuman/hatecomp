@@ -21,7 +21,7 @@ training_config = {
 }
 
 # Import a raw hatecomp dataset
-raw_dataset = NAACL()
+raw_dataset = NLPCSS()
 num_classes = raw_dataset.num_classes
 
 # Use the huggingface auto classes to load a transformer and
@@ -52,7 +52,7 @@ def compute_metrics(eval_pred):
     metric_outputs = {}
     for metric in metrics:
         metric_outputs.update(
-            metric.compute(predictions=predictions, references=[labels])
+            metric.compute(predictions=predictions, references=labels)
         )
     return metric_outputs
 
