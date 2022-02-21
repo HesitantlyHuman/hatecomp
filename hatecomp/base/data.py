@@ -59,7 +59,7 @@ class _HatecompDataset(IterableDataset):
         downloader.load()
 
     def load_data(self, path: str) -> Tuple[list, list, list]:
-        return list, list, list
+        raise NotImplementedError
 
     def encode_labels(self, encoding_scheme: dict) -> List:
         class_values = [set() for i in self.labels[0]]

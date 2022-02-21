@@ -22,20 +22,30 @@ def calculate_class_f1(confusion_matrix, class_index):
 
 class Accuracy:
     def compute(self, predictions, references):
-        total = len(predictions)
-        total_correct = np.sum(np.where(predictions == references, 1, 0))
-        return {"accuracy": total_correct / total}
+        accuracy_scores = []
+        for task_predictions, task_references in zip(predictions, references):
+            total = len(task_predictions)
+            total_correct = np.sum(np.where(task_predictions == task_references, 1, 0))
+            accuracy_scores.append(total_correct / total)
+        return {"accuracy": accuracy_scores}
 
 
 class F1:
     def __init__(self, num_classes):
+        if not isinstance(num_classes, (tuple, list)):
+            num_classes = [num_classes]
         self.num_classes = num_classes
 
     def compute(self, predictions, references):
         f1_scores = []
-        confusion_matrix = calculate_confusion_matrix(
-            predictions, references, self.num_classes
-        )
-        for class_index in range(self.num_classes):
-            f1_scores.append(calculate_class_f1(confusion_matrix, class_index))
+        for num_classes_task, predictions_task, references_task in zip(
+            self.num_classes, predictions, references
+        ):
+            f1_scores_task = []
+            confusion_matrix = calculate_confusion_matrix(
+                predictions_task, references_task, num_classes_task
+            )
+            for class_index in range(num_classes_task):
+                f1_scores_task.append(calculate_class_f1(confusion_matrix, class_index))
+            f1_scores.append(f1_scores_task)
         return {"f1": f1_scores}

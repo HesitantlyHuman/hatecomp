@@ -49,3 +49,7 @@ Implement a multi-task model, both for datasets with multiple tasks, and for the
 Collect and organize the Cornell Conversational Analysis Toolkit datasets found [here](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit#datasets)
 Add sentiment lexicon https://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.html
 Update package and requirements.txt
+More hatespeech data?
+https://arxiv.org/abs/1802.00393
+https://github.com/ENCASEH2020/hatespeech-twitter
+Also, consider running the huggingface fine tuning on the entire corpus, and then training the mutlihead model.

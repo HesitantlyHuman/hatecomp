@@ -11,11 +11,11 @@ training_config = {
     "train_batch_size": 16,
     "eval_batch_size": 128,
     "dataloader_workers": 12,
-    "test_proportion": 0.3,
+    "test_proportion": 0.1,
     "learning_rate": 2e-5,
     "weight_decay": 0.1,
     "dropout": 0.2,  # Figure out how this is supposed to plumb through
-    "warmup_ratio": 0.05,
+    "warmup_ratio": 0.1,
     "lr_cycles": 2,
     "transformer_model": "roberta-base",
 }
@@ -39,7 +39,7 @@ model = AutoModelForSequenceClassification.from_pretrained(
 tokenizer_function = lambda tokenization_input: tokenize_bookends(
     tokenization_input, model.config.max_position_embeddings, tokenizer
 )
-tokenized_dataset = raw_dataset.map(tokenizer_function, batched=True)[:200]
+tokenized_dataset = raw_dataset.map(tokenizer_function, batched=True)
 train_split, test_split = tokenized_dataset.split(training_config["test_proportion"])
 
 # Create a function to compute our accuracy and F1 metrics
@@ -47,13 +47,12 @@ metrics = [Accuracy(), F1(num_classes)]
 
 
 def compute_metrics(eval_pred):
-    print(eval_pred)
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
     metric_outputs = {}
     for metric in metrics:
         metric_outputs.update(
-            metric.compute(predictions=predictions, references=labels)
+            metric.compute(predictions=predictions, references=[labels])
         )
     return metric_outputs
 
