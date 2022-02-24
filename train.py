@@ -1,5 +1,6 @@
+from cgi import test
 import numpy as np
-from hatecomp.datasets import NAACL, NLPCSS, Vicomtech, TwitterSexism
+from hatecomp.datasets import NAACL, NLPCSS, Vicomtech, TwitterSexism, HASOC, MLMA
 from hatecomp.training import HatecompTrainer, HatecompTrainingArgs, Accuracy, F1
 from hatecomp.models import AutoModelForSequenceClassification
 from hatecomp.base.utils import tokenize_bookends
@@ -21,8 +22,9 @@ training_config = {
 }
 
 # Import a raw hatecomp dataset
-raw_dataset = NLPCSS()
+raw_dataset = MLMA()
 num_classes = raw_dataset.num_classes
+print(raw_dataset[0])
 
 # Use the huggingface auto classes to load a transformer and
 # This will also configure the classification head for
@@ -48,7 +50,10 @@ metrics = [Accuracy(), F1(num_classes)]
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
+    predictions = np.squeeze(
+        np.array([np.argmax(task_logits, axis=-1) for task_logits in logits])
+    )
+    labels = labels.T
     metric_outputs = {}
     for metric in metrics:
         metric_outputs.update(

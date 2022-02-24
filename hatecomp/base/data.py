@@ -48,10 +48,37 @@ class _HatecompDataset(IterableDataset):
         ), f"{self.__name__} does not have a LABEL_KEY defined!"
         self.labels = self.encode_labels(self.LABEL_KEY)
 
-    def split(self, p: float = 0.9) -> Tuple[Subset, Subset]:
-        train_size = int(p * len(self))
-        test_size = len(self) - train_size
-        return torch.utils.data.random_split(self, [train_size, test_size])
+    def split(
+        self, test_proportion: float = 0.1, class_minimum=None
+    ) -> Tuple[Subset, Subset]:
+        test_size = int(test_proportion * len(self))
+        train_size = len(self) - test_size
+        if not class_minimum is None:
+            num_classes = self.num_classes
+            all_classes_in_set = [False, False]
+            while not all(all_classes_in_set):
+                train_set, test_set = torch.utils.data.random_split(
+                    self, [train_size, test_size]
+                )
+                for dataset_idx, dataset in enumerate([train_set, test_set]):
+                    class_counts = [
+                        np.zeros(class_count) for class_count in num_classes
+                    ]
+                    for item in dataset:
+                        targets = item["label"]
+                        for idx, target in enumerate(targets):
+                            class_counts[idx][target] += 1
+                    all_classes_in_set[dataset_idx] = all(
+                        [
+                            np.all(np.where(class_count > class_minimum, True, False))
+                            for class_count in class_counts
+                        ]
+                    )
+        else:
+            train_set, test_set = torch.utils.data.random_split(
+                self, [train_size, test_size]
+            )
+        return (train_set, test_set)
 
     def download(self, path: str):
         logging.info(f"Downloading {self.__name__} data to location f{path}.")
@@ -86,10 +113,6 @@ class _HatecompDataset(IterableDataset):
             self.data[slice] = mapped_data
 
         return self
-
-    def split(self, test_proportion: float = 0.1):
-        n_test = int(test_proportion * len(self))
-        return torch.utils.data.random_split(self, [len(self) - n_test, n_test])
 
     def __len__(self) -> int:
         return len(self.data)

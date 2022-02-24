@@ -5,3 +5,4 @@ from hatecomp.datasets.Vicomtech.dataset import VicomtechDataset as Vicomtech
 from hatecomp.datasets.TwitterSexism.dataset import (
     TwitterSexismDataset as TwitterSexism,
 )
+from hatecomp.datasets.MLMA.dataset import MLMADataset as MLMA

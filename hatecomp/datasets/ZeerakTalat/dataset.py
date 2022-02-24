@@ -4,7 +4,7 @@ import os
 import csv
 
 import numpy as np
-from torch.utils import data
+import torch
 
 from hatecomp._path import install_path
 from hatecomp.base.data import _HatecompDataset
@@ -53,3 +53,21 @@ class NLPCSSDataset(_HatecompDataset):
             data.append(item[1])
             labels.append(item[2:])
         return (np.array(ids), data, np.array(labels))
+
+    def encode_labels(self, encoding_scheme: dict) -> List:
+        encoded_multiclass = []
+        for labels in self.labels:
+            encoded_labels = []
+            expert, amateur = encoding_scheme[labels[0]], encoding_scheme[labels[1]]
+            for labels in [expert, amateur]:
+                if labels == 0:
+                    encoded_labels += [0, 0]
+                elif labels == 1:
+                    encoded_labels += [1, 0]
+                elif labels == 2:
+                    encoded_labels += [0, 1]
+                elif labels == 3:
+                    encoded_labels += [1, 1]
+            encoded_multiclass.append(torch.squeeze(torch.tensor(encoded_labels)))
+        self.num_classes = [2, 2, 2, 2]
+        return torch.stack(encoded_multiclass, dim=0)

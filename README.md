@@ -9,10 +9,12 @@ Additional information about each dataset can be found the corresponding ABOUT.m
 
 ### Working
 Currently the following datasets are implemented:
-- [ZeerakTalat NAACL]()
-- ZeerakTalat NLPCSS
-- HASOC
-- Vicomtech
+- [ZeerakTalat NAACL](hatecomp/datasets/ZeerakTalat/README.md)
+- [ZeerakTalat NLPCSS](hatecomp/datasets/ZeerakTalat/README.md)
+- [HASOC](hatecomp/datasets/HASOC/README.md)
+- [Vicomtech](hatecomp/datasets/Vicomtech/README.md)
+- [TwitterSexism](hatecomp/datasets/TwitterSexism/README.md)
+- [MLMA](hatecomp/datasets/MLMA/README.md)
 
 ### Notes
 
@@ -28,9 +30,10 @@ Here is a list of results acheived on various datasets with Huggingface models, 
 | -- | -- | -- | -- |
 | [Vicomtech](https://arxiv.org/pdf/1809.04444.pdf) | Accuracy | 0.79 | **0.93** |
 | [ZeerakTalat-NAACL](https://aclanthology.org/N16-2013.pdf) | F1 | 0.74 | **0.94** |
-| [ZeerakTalat-NLPCSS](https://aclanthology.org/W16-5618.pdf) | F1 | 0.53 | NA |
-| [HASOC](https://arxiv.org/pdf/2108.05927.pdf) | F1 (Macro) | 0.53 | NA |
+| [ZeerakTalat-NLPCSS](https://aclanthology.org/W16-5618.pdf) | F1 | 0.53 | **0.76** |
+| [HASOC](https://arxiv.org/pdf/2108.05927.pdf) | F1 (Macro Average) | 0.53 | **0.55** |
 | [TwitterSexism](https://aclanthology.org/W17-2902.pdf) | F1 (Macro) | 0.87 | **0.99** |
+| [MLMA](https://arxiv.org/pdf/1908.11049.pdf) | F1 (Multitask Macros EN) | [0.30, 0.43, **0.18**, **0.57**] | [**0.58**, **0.64**, 0.16, 0.51] |
 
 (If you know of a better SOTA than what is listed here, please create an issue or pull request.)
 
@@ -39,7 +42,7 @@ Also note that some of these datasets require tweet data. For these, a large num
 | Dataset | Total Size | Successfully Downloaded Tweets | Available Training Portion |
 | -- | -- | -- | -- |
 | ZeerakTalat-NAACL | 16907 | 7210 | 0.4264 |
-| ZeerakTalat-NLPCSS | 6909 | 4190 | 0.6064 |
+| ZeerakTalat-NLPCSS | 6909 | 5385 | 0.77941 |
 | TwitterSexism | 10583 | 5054 | 0.4775 |
 
 This info is valid as of Feb 2022, and is probably subject to change as Twitter continues to lock down their API.

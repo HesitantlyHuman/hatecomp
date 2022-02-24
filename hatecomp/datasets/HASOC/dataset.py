@@ -16,7 +16,7 @@ class HASOCDataset(_HatecompDataset):
     DEFAULT_DIRECTORY = DEFAULT_DIRECTORY = os.path.join(
         install_path, "datasets/HASOC/data"
     )
-    LABEL_ENCODING = {
+    LABEL_KEY = {
         "HOF": 1,
         "NOT": 0,
         "HATE": 1,
@@ -29,7 +29,7 @@ class HASOCDataset(_HatecompDataset):
 
     CSV_FILE = "hasoc.csv"
 
-    def __init__(self, root: str = None, download=False):
+    def __init__(self, root: str = None, download=True):
         super().__init__(root=root, download=download)
 
     def load_data(self, path: str) -> Tuple[List]:

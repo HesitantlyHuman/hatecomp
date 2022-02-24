@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 
 import torch
 from transformers.trainer import Trainer, TrainingArguments
-from torch.utils.data import DataLoader
-from hatecomp.base.utils import get_class_weights
+from torch.utils.data import Dataset, DataLoader
+from hatecomp.base.utils import get_class_weights, id_collate
 from transformers.optimization import get_cosine_with_hard_restarts_schedule_with_warmup
 from transformers.utils import logging
 from transformers.trainer_pt_utils import nested_detach
@@ -24,12 +24,46 @@ class HatecompTrainingArgs(TrainingArguments):
 
 
 class HatecompTrainer(Trainer):
+    def __init__(
+        self,
+        model=None,
+        args: TrainingArguments = None,
+        data_collator=None,
+        train_dataset: Optional[Dataset] = None,
+        eval_dataset: Optional[Dataset] = None,
+        tokenizer=None,
+        model_init=None,
+        compute_metrics=None,
+        callbacks=None,
+        optimizers: Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler.LambdaLR] = (
+            None,
+            None,
+        ),
+    ):
+        if data_collator is None:
+            data_collator = id_collate
+        super().__init__(
+            model,
+            args,
+            data_collator,
+            train_dataset,
+            eval_dataset,
+            tokenizer,
+            model_init,
+            compute_metrics,
+            callbacks,
+            optimizers,
+        )
+
     def get_train_dataloader(self) -> DataLoader:
         if self.train_dataset is None:
             raise ValueError("Trainer: training requires a train_dataset.")
-        self.class_weights = get_class_weights(
-            self.train_dataset, self.model.config.num_labels
-        ).to(self.args.device)
+        self.class_weights = [
+            task_weights.to(self.args.device)
+            for task_weights in get_class_weights(
+                self.train_dataset, self.model.config.num_labels
+            )
+        ]
         return super().get_train_dataloader()
 
     def prediction_step(
@@ -132,7 +166,7 @@ class HatecompTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False):
         labels = inputs.get("labels")
 
-        outputs = model(**inputs)
+        outputs = model(**{k: v for k, v in inputs.items() if not k == "id"})
 
         losses = []
         for task_idx, task_outputs in enumerate(outputs):
@@ -140,7 +174,8 @@ class HatecompTrainer(Trainer):
 
             loss_fct = torch.nn.CrossEntropyLoss(weight=self.class_weights[task_idx])
             loss = loss_fct(
-                logits.view(-1, self.model.config.num_labels[task_idx]), labels.view(-1)
+                logits.view(-1, self.model.config.num_labels[task_idx]),
+                labels[:, task_idx].view(-1),
             )
             losses.append(loss)
         return (
