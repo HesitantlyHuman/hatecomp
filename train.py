@@ -1,9 +1,8 @@
-from cgi import test
 import numpy as np
-from hatecomp.datasets import NAACL, NLPCSS, Vicomtech, TwitterSexism, HASOC, MLMA
+from hatecomp.datasets import TwitterSexism
 from hatecomp.training import HatecompTrainer, HatecompTrainingArgs, Accuracy, F1
 from hatecomp.models import AutoModelForSequenceClassification
-from hatecomp.base.utils import tokenize_bookends
+from hatecomp.datasets.base.utils import tokenize_bookends
 from transformers import AutoTokenizer
 
 # Set the basic training parameters we will use in this run
@@ -22,9 +21,10 @@ training_config = {
 }
 
 # Import a raw hatecomp dataset
-raw_dataset = MLMA()
-num_classes = raw_dataset.num_classes
+raw_dataset = TwitterSexism()
 print(raw_dataset[0])
+num_classes = raw_dataset.num_classes()
+
 
 # Use the huggingface auto classes to load a transformer and
 # This will also configure the classification head for

@@ -2,7 +2,7 @@ import os
 import csv
 
 from hatecomp.tweets.fetch import TweetDownloader
-from hatecomp.base.download import _CSVDownloader
+from hatecomp.datasets.base.download import _CSVDownloader
 
 
 class TwitterSexismDownloader(_CSVDownloader):
@@ -26,8 +26,6 @@ class TwitterSexismDownloader(_CSVDownloader):
         tweet_ids = benevolent_id_list + hostile_id_list
         with TweetDownloader() as tweet_downloader:
             tweets = tweet_downloader.download(tweet_ids)
-        print(len(tweets))
-        print(tweets.keys())
         twitter_sexism_csv = []
         for tweet_id in tweet_ids:
             if tweet_id in hostile_id_list:

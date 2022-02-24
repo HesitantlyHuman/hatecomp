@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import torch
 from transformers.trainer import Trainer, TrainingArguments
 from torch.utils.data import Dataset, DataLoader
-from hatecomp.base.utils import get_class_weights, id_collate
+from hatecomp.datasets.base.utils import get_class_weights, id_collate
 from transformers.optimization import get_cosine_with_hard_restarts_schedule_with_warmup
 from transformers.utils import logging
 from transformers.trainer_pt_utils import nested_detach

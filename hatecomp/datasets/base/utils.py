@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Iterable
 import torch
 from torch.utils.data.dataloader import default_collate
 
@@ -23,6 +23,38 @@ def tokenize_bookends(tokenization_input: str, output_length: int, tokenizer: Ca
 
 def get_bookends(sequence, length_start, length_end):
     return torch.cat((sequence[:length_start], sequence[-length_end:]), dim=0)
+
+
+def batch(iterable, batch_size=1):
+    length = len(iterable)
+    for ndx in range(0, length, batch_size):
+        upper = min(ndx + batch_size, length)
+        yield iterable[ndx:upper]
+
+
+def batch_enumerate(iterable, batch_size=1):
+    length = len(iterable)
+    for ndx in range(0, length, batch_size):
+        upper = min(ndx + batch_size, length)
+        yield (slice(ndx, upper), iterable[ndx:upper])
+
+
+def get_unique(input_iterator, ordered=True):
+    if ordered:
+        unique = list(set(input_iterator))
+        unique.sort()
+        return unique
+    else:
+        seen = set()
+        seen_add = seen.add
+        return [item for item in input_iterator if not (item in seen or seen_add(item))]
+
+
+def map_functions(obj: object, function_list: Iterable[Callable]):
+    value = obj
+    for function in function_list:
+        value = function(value)
+    return value
 
 
 def id_collate(unprocessed_batch):
