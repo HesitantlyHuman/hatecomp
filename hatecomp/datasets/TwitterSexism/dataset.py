@@ -4,10 +4,9 @@ import os
 import csv
 
 import numpy as np
-from torch.utils import data
 
 from hatecomp._path import install_path
-from hatecomp.base.data import _HatecompDataset
+from hatecomp.datasets.base.data import _HatecompDataset
 from hatecomp.datasets.TwitterSexism.download import TwitterSexismDownloader
 
 

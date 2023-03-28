@@ -1,37 +1,26 @@
 from typing import List
+import os
+import json
+import logging
+
 import torch
-from transformers import AutoModelForSequenceClassification
-from transformers.configuration_utils import PretrainedConfig
-from transformers.modeling_outputs import SequenceClassifierOutput
+from transformers import AutoModel
+
+from hatecomp.models.download import download_model, PRETRAINED_INSTALLATION_LOCATION
+
+# Suppress the huggingface warning about fine tuning the model
+logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
 
 
-class HatecompConfig:
-    OVERRIDDEN_ATTRIBUTES = ["num_labels"]
-
-    def __init__(self, config: PretrainedConfig):
-        self.config = config
-
-    def ___setattr__(self, key, value):
-        if key in self.OVERRIDDEN_ATTRIBUTES:
-            super().__setattr__(key, value)
-        else:
-            self.config.__setattr__(key, value)
-
-    def __getattr__(self, key):
-        if key in self.OVERRIDDEN_ATTRIBUTES:
-            return getattr(self, key)
-        else:
-            return getattr(self.config, key)
-
-
-class HatecompMultiheaded(torch.nn.Module):
+class HatecompClassifier(torch.nn.Module):
     def __init__(
-        self, base_model: torch.nn.Module, heads: List[torch.nn.Module], config
+        self,
+        base_model: torch.nn.Module,
+        heads: List[torch.nn.Module],
     ):
         super().__init__()
-        self.base = base_model
+        self.transformer = base_model
         self.heads = torch.nn.ModuleList(heads)
-        self.config = config
 
     def forward(self, *args, **kwargs):
         kwargs = {
@@ -39,34 +28,95 @@ class HatecompMultiheaded(torch.nn.Module):
             for parameter, value in kwargs.items()
             if not parameter == "labels"
         }
-        base_outputs = self.base(*args, **kwargs)
-        return [
-            SequenceClassifierOutput(
-                loss=None,
-                logits=head(base_outputs),
-                hidden_states=base_outputs.hidden_states,
-                attentions=base_outputs.attentions,
+        # Get the CLS token output
+        transformer_output = self.transformer(*args, **kwargs)[0][:, 0, :]
+        return [head(transformer_output) for head in self.heads]
+
+    @classmethod
+    def from_huggingface_pretrained(
+        self,
+        transformer_name: str,
+        num_classes: List[int],
+        head_hidden_size: int = 768,
+        dropout: float = 0.1,
+    ) -> "HatecompClassifier":
+        transformer = AutoModel.from_pretrained(transformer_name)
+        heads = [
+            HatecompClassificationHead(
+                transformer.config.hidden_size,
+                head_hidden_size,
+                num_classes=task_num_classes,
+                dropout=dropout,
             )
-            for head in self.heads
+            for task_num_classes in num_classes
         ]
+        return self(transformer, heads)
 
-
-# Copied from the huggingface RobertaClassificationHead
-class HatecompClassificationHead(torch.nn.Module):
-    def __init__(self, config, num_classes):
-        super().__init__()
-        self.dense = torch.nn.Linear(config.hidden_size, config.hidden_size)
-        classifier_dropout = (
-            config.classifier_dropout
-            if config.classifier_dropout is not None
-            else config.hidden_dropout_prob
+    @classmethod
+    def from_hatecomp_pretrained(
+        self,
+        pretrained_model_name_or_path: str,
+        download: bool = False,
+        force_download: bool = False,
+    ) -> "HatecompClassifier":
+        # Look for the model in the local directory
+        pretrained_model_name_or_path = pretrained_model_name_or_path.lower()
+        local_path = os.path.join(
+            PRETRAINED_INSTALLATION_LOCATION, pretrained_model_name_or_path
         )
-        self.dropout = torch.nn.Dropout(classifier_dropout)
-        self.out_proj = torch.nn.Linear(config.hidden_size, num_classes)
+        if not os.path.exists(local_path) or force_download:
+            if download or force_download:
+                download_model(pretrained_model_name_or_path)
+            else:
+                raise FileNotFoundError(
+                    f"Could not find the model {pretrained_model_name_or_path} in the local directory. "
+                    f"If you want to download the model, set download=True."
+                )
+
+        # Load the model configuration
+        config_path = os.path.join(
+            PRETRAINED_INSTALLATION_LOCATION,
+            pretrained_model_name_or_path,
+            "config.json",
+        )
+        with open(config_path, "r") as f:
+            config = json.load(f)
+
+        # Create a new model
+        model = self.from_huggingface_pretrained(
+            config["transformer_name"],
+            config["num_classes"],
+            config["head_hidden_size"],
+            config["dropout"],
+        )
+
+        # Load the state dict
+        state_dict_path = os.path.join(
+            PRETRAINED_INSTALLATION_LOCATION, pretrained_model_name_or_path, "model.pt"
+        )
+        model.load_state_dict(torch.load(state_dict_path))
+
+        # Return the model
+        return model
+
+
+class HatecompClassificationHead(torch.nn.Module):
+    def __init__(
+        self,
+        transformer_hidden_size: int,
+        head_hidden_size: int,
+        num_classes: int,
+        dropout: float = 0.1,
+    ):
+        super().__init__()
+        self.dense = torch.nn.Linear(transformer_hidden_size, head_hidden_size)
+        self.dropout = torch.nn.Dropout(dropout) if dropout is not None else None
+        self.out_proj = torch.nn.Linear(head_hidden_size, num_classes)
 
     def forward(self, features, **kwargs):
-        x = features[0][:, 0, :]
-        x = self.dropout(x)
+        x = features
+        if self.dropout is not None:
+            x = self.dropout(x)
         x = self.dense(x)
         x = torch.tanh(x)
         x = self.dropout(x)
@@ -74,39 +124,6 @@ class HatecompClassificationHead(torch.nn.Module):
         return x
 
 
-class HatecompAutoModelForSequenceClassification(AutoModelForSequenceClassification):
-    def from_pretrained(transformer_name: str, num_labels: List[int]):
-        model = AutoModelForSequenceClassification.from_pretrained(
-            transformer_name, num_labels=1
-        )
-        if isinstance(num_labels, int):
-            model.config.multiheaded = False
-            num_labels = [num_labels]
-        elif isinstance(num_labels, (tuple, list)):
-            if len(num_labels) > 1:
-                model.config.multiheaded = True
-            else:
-                model.config.multiheaded = False
-        elif isinstance(num_labels, torch.Tensor):
-            if len(num_labels.shape) == 0:
-                model.config.multiheaded = False
-            else:
-                model.config.multiheaded = True
-
-        model = HatecompAutoModelForSequenceClassification.recapitate(
-            model, num_labels=num_labels
-        )
-
-        return model
-
-    def recapitate(model, num_labels):
-        config = HatecompConfig(model.config)
-        config.num_labels = num_labels
-        classifiers = torch.nn.ModuleList(
-            [
-                HatecompClassificationHead(config, num_classes)
-                for num_classes in num_labels
-            ]
-        )
-        base_model = getattr(model, model.base_model_prefix)
-        return HatecompMultiheaded(base_model, classifiers, config)
+if __name__ == "__main__":
+    model = HatecompClassifier.from_hatecomp_pretrained("MLMA", force_download=True)
+    print(model)

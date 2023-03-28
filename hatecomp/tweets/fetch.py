@@ -1,6 +1,6 @@
 from tqdm import tqdm
 import logging
-import aiometer
+import aiometer  # TODO dont import this if not necessary
 import asyncio
 import httpx
 import tweepy

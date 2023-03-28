@@ -15,6 +15,7 @@ if __name__ == "__main__":
         author="GenerallyIntelligent",
         author_email="tannersims@generallyintelligent.me",
         license="MIT",
+        package_data={"hatecomp": ["models/model_registry.json"]},
         packages=find_packages(),
         install_requires=[
             "aiometer >=0.3.0, <1.0.0",

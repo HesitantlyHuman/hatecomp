@@ -5,7 +5,7 @@ import csv
 
 import numpy as np
 
-from hatecomp.base.data import _HatecompDataset
+from hatecomp.datasets.base.data import _HatecompDataset
 from hatecomp._path import install_path
 from hatecomp.datasets.HASOC.download import HASOCDownloader
 

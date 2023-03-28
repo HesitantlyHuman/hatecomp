@@ -2,7 +2,7 @@ import os
 import csv
 
 from hatecomp.tweets.fetch import TweetDownloader
-from hatecomp.base.download import _CSVDownloader
+from hatecomp.datasets.base.download import _CSVDownloader
 
 
 class TwitterSexismDownloader(_CSVDownloader):

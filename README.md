@@ -56,3 +56,5 @@ More hatespeech data?
 https://arxiv.org/abs/1802.00393
 https://github.com/ENCASEH2020/hatespeech-twitter
 Also, consider running the huggingface fine tuning on the entire corpus, and then training the mutlihead model.
+Better names for some of these datasets. Probably don't want a dataset named after a conference or github handle
+Update README

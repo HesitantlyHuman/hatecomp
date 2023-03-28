@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 from hatecomp._path import install_path
-from hatecomp.base.data import _HatecompDataset
+from hatecomp.datasets.base.data import _HatecompDataset
 from hatecomp.datasets.ZeerakTalat.download import NAACLDownloader, NLPCSSDownloader
 
 

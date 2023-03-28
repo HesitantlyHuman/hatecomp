@@ -1,15 +1,12 @@
 from typing import Callable, List, Mapping, Tuple, Union
 import logging
-import os
 
 import torch
 from torch.utils.data import IterableDataset, DataLoader
 import numpy as np
 from torch.utils.data.dataset import Subset
 
-from hatecomp.base.utils import id_collate, tokenize_bookends, batch_and_slice
-
-os.environ["TOKENIZERS_PARALLELISM"] = "true"
+from hatecomp.datasets.base.utils import id_collate, batch_and_slice
 
 
 class _HatecompDataset(IterableDataset):
@@ -90,16 +87,16 @@ class _HatecompDataset(IterableDataset):
 
     def encode_labels(self, encoding_scheme: dict) -> List:
         class_values = [set() for i in self.labels[0]]
-        encoded_muliclass = []
+        encoded_labels = []
         for labels in self.labels:
             encoded_example = []
             for idx, label in enumerate(labels):
                 encoded_label = encoding_scheme[label]
                 class_values[idx].add(encoded_label)
                 encoded_example.append(encoded_label)
-            encoded_muliclass.append(torch.squeeze(torch.tensor(encoded_example)))
+            encoded_labels.append(torch.squeeze(torch.tensor(encoded_example)))
         self.num_classes = [len(class_options) for class_options in class_values]
-        return torch.stack(encoded_muliclass, dim=0)
+        return encoded_labels
 
     def map(self, function: Callable, batched: bool = False, batch_size: int = 128):
         if not batched:
@@ -118,7 +115,6 @@ class _HatecompDataset(IterableDataset):
         return len(self.data)
 
     def __getitem__(self, index: Union[int, slice]) -> Tuple:
-        # TODO Create some sort of dataset view class to avoid this data duplication
         if isinstance(index, slice):
             dataset_class = type(self)
             dataset_view = dataset_class.__new__(dataset_class)
@@ -134,6 +130,10 @@ class _HatecompDataset(IterableDataset):
             else:
                 item.update({"data": data})
             return item
+
+    def __iter__(self):
+        for idx in range(len(self)):
+            yield self[idx]
 
 
 class DataLoader(DataLoader):

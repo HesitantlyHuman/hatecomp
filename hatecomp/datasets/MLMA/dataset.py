@@ -2,12 +2,10 @@ from typing import List, Tuple
 
 import os
 import csv
-import logging
 
 import torch
-import numpy as np
 
-from hatecomp.base.data import _HatecompDataset
+from hatecomp.datasets.base.data import _HatecompDataset
 from hatecomp.datasets.MLMA.download import MLMADownloader
 from hatecomp._path import install_path
 

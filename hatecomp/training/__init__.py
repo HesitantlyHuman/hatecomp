@@ -1,2 +1,2 @@
-from hatecomp.training.trainer import HatecompTrainer, HatecompTrainingArgs
-from hatecomp.training.metrics import Accuracy, F1
+from hatecomp.training.trainer import HatecompTrainer
+from hatecomp.training.hatecomp_trial import HatecompTrialRunner, HatecompTrialConfig

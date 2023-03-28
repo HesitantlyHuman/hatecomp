@@ -1,0 +1,10 @@
+{
+    "mlma": {
+        "model": "https://drive.google.com/uc?export=download&id=1s4yDPLGLpoK4Y_vhsjJpRhUGzzcIU8r3&confirm=t&uuid=45a1a035-bdad-491c-95f1-47d61850ab69&at=ANzk5s5lyrmu2Qod-MdwWjNKECsM:1679723671482",
+        "config": "https://drive.google.com/uc?export=download&id=1ulI4REr9fzT6Vk4HyvyRCdAW_z9J2LQY"
+    },
+    "vicomtech": {
+        "model": "https://drive.google.com/uc?export=download&id=1v2gDkBmKHu5glkMr3vaSu3n9o_shEe1U&confirm=t&uuid=c4c138f4-3d28-4dca-bd29-d5f7ad420121&at=ANzk5s5mvZHceuhqdN09MSRuioJ1:1679759845189",
+        "config": "https://drive.google.com/uc?export=download&id=1gjp_Ha42uzSqkP5We0mfwR8rgfi42BGP"
+    }
+}
