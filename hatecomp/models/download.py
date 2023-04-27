@@ -18,6 +18,23 @@ with open(model_registry_path, "r") as f:
     MODEL_REGISTRY = json.load(f)
     MODEL_REGISTRY = {k.lower(): v for k, v in MODEL_REGISTRY.items()}
 
+def verify_pretrained_download(
+    pretrained_model_name_or_path: str,
+    download: bool = False,
+    force_download: bool = False
+) -> None:
+    pretrained_model_name_or_path = pretrained_model_name_or_path.lower()
+    local_path = os.path.join(
+        PRETRAINED_INSTALLATION_LOCATION, pretrained_model_name_or_path
+    )
+    if not os.path.exists(local_path) or force_download:
+        if download or force_download:
+            download_model(pretrained_model_name_or_path)
+        else:
+            raise FileNotFoundError(
+                f"Could not find the model {pretrained_model_name_or_path} in the local directory. "
+                f"If you want to download the model, set download=True."
+            )
 
 def download_model(model_name: str, verbose: bool = True) -> None:
     model_name = model_name.lower()

@@ -38,6 +38,7 @@ def split_label_tensor(
 def compute_loss(
     model: torch.nn.Module,
     tokenizer: Callable[[str], Dict[str, torch.Tensor]],
+    loss_function: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
     class_weights: List[torch.Tensor],
     batch: Dict[str, torch.Tensor],
     device: Union[str, torch.device],
@@ -50,8 +51,8 @@ def compute_loss(
 
     loss = torch.tensor(0.0).to("cuda:0")
     for head_idx, head_outputs in enumerate(outputs):
-        loss = torch.nn.functional.cross_entropy(
-            head_outputs,
+        loss = loss_function(
+            torch.squeeze(head_outputs),
             labels[head_idx],
             weight=class_weights[head_idx],
         )
@@ -75,6 +76,7 @@ def training_step(
     batch: Dict[str, torch.Tensor],
     optimizer: torch.optim.Optimizer,
     scheduler: torch.optim.lr_scheduler._LRScheduler,
+    loss_function: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
     class_weights: List[torch.Tensor],
     device: Union[str, torch.device],
     minibatch_size: int = 8,
@@ -83,7 +85,9 @@ def training_step(
 
     def training_ministep(minibatch) -> torch.Tensor:
         optimizer.zero_grad(set_to_none=True)
-        loss = compute_loss(model, tokenizer, class_weights, minibatch, device)
+        loss = compute_loss(
+            model, tokenizer, loss_function, class_weights, minibatch, device
+        )
         loss.backward()
         return loss.detach()
 
@@ -103,6 +107,7 @@ def training_epoch(
     dataloader: torch.utils.data.DataLoader,
     optimizer: torch.optim.Optimizer,
     scheduler: torch.optim.lr_scheduler._LRScheduler,
+    loss_function: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
     class_weights: List[torch.Tensor],
     device: Union[str, torch.device],
     minibatch_size: int = 8,
@@ -120,6 +125,7 @@ def training_epoch(
             batch,
             optimizer,
             scheduler,
+            loss_function,
             class_weights,
             device,
             minibatch_size,
@@ -141,20 +147,31 @@ def calculate_confusion_matrices(
     labels = split_label_tensor(batch, device)
     confusion_matrices = []
     for head_idx, head_outputs in enumerate(outputs):
-        num_classes = head_outputs.shape[1]
-        head_outputs = torch.argmax(head_outputs, dim=1)
-        confusion_matrix = torch.zeros((num_classes, num_classes), dtype=torch.long).to(
-            device
-        )
-        for i in range(len(head_outputs)):
-            confusion_matrix[head_outputs[i], labels[head_idx][i]] += 1
-        confusion_matrices.append(confusion_matrix)
+        if not labels[head_idx].dtype in [torch.long, torch.int, torch.bool]:
+            thresholded_labels, head_outputs = (
+                (labels[head_idx] > 0.5).long(),
+                torch.squeeze(head_outputs > 0.0).long(),
+            )
+            confusion_matrix = torch.zeros((2, 2), dtype=torch.long).to(device)
+            for i in range(len(head_outputs)):
+                confusion_matrix[head_outputs[i], thresholded_labels[i]] += 1
+            confusion_matrices.append(confusion_matrix)
+        else:
+            num_classes = head_outputs.shape[1]
+            head_outputs = torch.argmax(head_outputs, dim=1)
+            confusion_matrix = torch.zeros(
+                (num_classes, num_classes), dtype=torch.long
+            ).to(device)
+            for i in range(len(head_outputs)):
+                confusion_matrix[head_outputs[i], labels[head_idx][i]] += 1
+            confusion_matrices.append(confusion_matrix)
     return confusion_matrices
 
 
 def evaluation_step(
     model: torch.nn.Module,
     tokenizer: Callable[[str], Dict[str, torch.Tensor]],
+    loss_function: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
     class_weights: List[torch.Tensor],
     batch: Dict[str, torch.Tensor],
     device: Union[str, torch.device],
@@ -164,24 +181,33 @@ def evaluation_step(
 
     def evaluation_ministep(minibatch) -> Tuple[torch.Tensor, List[torch.Tensor]]:
         loss, outputs = compute_loss(
-            model, tokenizer, class_weights, minibatch, device, return_outputs=True
+            model,
+            tokenizer,
+            loss_function,
+            class_weights,
+            minibatch,
+            device,
+            return_outputs=True,
         )
         confusion_matrices = calculate_confusion_matrices(minibatch, outputs, device)
         return loss, confusion_matrices
 
     loss = torch.tensor(0.0).to(device)
-    confusion_matrices = None
+    confusion_sum = None
     for minibatch in minibatches:
         loss, confusion_matrices = evaluation_ministep(minibatch)
 
         loss += loss
-        if confusion_matrices is None:
-            confusion_matrices = confusion_matrices
-        else:
-            for i in range(len(confusion_matrices)):
-                confusion_matrices[i] += confusion_matrices[i]
 
-    return loss / len(minibatches), confusion_matrices
+        if confusion_matrices is None:
+            continue
+
+        if confusion_sum is None:
+            confusion_sum = confusion_matrices
+        else:
+            confusion_sum += confusion_matrices
+
+    return loss / len(minibatches), confusion_sum
 
 
 def f1_score(confusion_matrix: torch.Tensor) -> float:
@@ -204,6 +230,7 @@ def evaluation_epoch(
     model: torch.nn.Module,
     tokenizer: Callable[[str], Dict[str, torch.Tensor]],
     dataloader: torch.utils.data.DataLoader,
+    loss_function: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
     class_weights: List[torch.Tensor],
     device: Union[str, torch.device],
     minibatch_size: int = 64,
@@ -218,7 +245,13 @@ def evaluation_epoch(
     with torch.no_grad():
         for batch in dataloader:
             loss, minibatch_confusion_matrices = evaluation_step(
-                model, tokenizer, class_weights, batch, device, minibatch_size
+                model,
+                tokenizer,
+                loss_function,
+                class_weights,
+                batch,
+                device,
+                minibatch_size,
             )
             losses.append(loss.item())
             if confusion_matrices is None:

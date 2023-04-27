@@ -1,7 +1,41 @@
+from typing import List
+
 import requests
 import zipfile
 import os
 from tqdm import tqdm
+from urllib.request import urlretrieve
+
+def download_files(urls: List[str], directory: str, progress_bar: bool = True):
+    if progress_bar:
+        try:
+            from tqdm import tqdm
+            class DownloadProgressBar:
+                def __init__(self, **kwargs) -> None:
+                    self.bar = tqdm(**kwargs)
+
+                def __call__(
+                    self, b: int = 1, bsize: int = 1, tsize: int = None
+                ) -> None:
+                    if tsize is not None:
+                        self.bar.total = tsize
+                    self.bar.update(b * bsize - self.bar.n)
+        except ImportError:
+            raise ImportError("You must install tqdm to use progress_bar=True")
+        
+    # Verify that the directory exists
+    os.makedirs(directory, exist_ok=True)
+
+    for url in urls:
+        file_name = os.path.join(directory, url.split('/')[-1])
+        if os.path.exists(file_name):
+            continue
+        if progress_bar:
+            progress_bar = DownloadProgressBar(total = 0, unit = 'B', unit_scale = True)
+        else:
+            progress_bar = lambda b, bsize, tsize: None
+        urlretrieve(url, file_name, progress_bar)
+    
 
 class _CSVDownloader():
     SAVE_PATHS = {}
@@ -74,3 +108,7 @@ class _ZipDownloader():
 
     def cleanup(self, path: str) -> None:
         pass
+
+
+if __name__ == "__main__":
+    download_files(["https://figshare.com/ndownloader/files/7394539"], "data")

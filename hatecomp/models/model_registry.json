@@ -6,5 +6,25 @@
     "vicomtech": {
         "model": "https://drive.google.com/uc?export=download&id=1v2gDkBmKHu5glkMr3vaSu3n9o_shEe1U&confirm=t&uuid=c4c138f4-3d28-4dca-bd29-d5f7ad420121&at=ANzk5s5mvZHceuhqdN09MSRuioJ1:1679759845189",
         "config": "https://drive.google.com/uc?export=download&id=1gjp_Ha42uzSqkP5We0mfwR8rgfi42BGP"
+    },
+    "twittersexism": {
+        "model": "https://drive.google.com/uc?id=1uYIsxzDrVysykHsdHJBq1XyFzTcHC7xC&export=download&confirm=t&uuid=d0939cd7-8cff-488d-b767-b954b4e40258&at=ANzk5s57SXIgPRLXIHutrm8Q7Tfl:1682534112337",
+        "config": "https://drive.google.com/uc?export=download&id=1HIOi3wGhQVBPoaNcbPuKCYRKpTDlrTCu"
+    },
+    "wikitoxicity": {
+        "model": "https://drive.google.com/uc?id=1R2pUTjp4CwrUljc9lLe6g6zCvpmUC5Hy&export=download&confirm=t&uuid=125fafee-801d-4c5b-92c9-1a130052d190&at=AKKF8vyjPYevzRK8hNGaB9-FCZoo:1682537069531",
+        "config": "https://drive.google.com/uc?export=download&id=1_JCDArRJ3_bMW3Nd4EsTVcmZTHx0pYwN"
+    },
+    "nlpcss": {
+        "model": "https://drive.google.com/u/1/uc?id=1nvRA-cKnCqvDEw8xS9lqxVUfvapyZnHw&export=download&confirm=t&uuid=140c97d3-ada9-4fef-bdd6-59264056de9e&at=AKKF8vwpOjBBY-r831TVOTPX7ZSt:1682537144545",
+        "config": "https://drive.google.com/uc?export=download&id=1g1_cC6HnNk6A5rEvV-Xh3hMlBsHkrGyi"
+    },
+    "naacl": {
+        "model": "https://drive.google.com/u/1/uc?id=1VxH7xNGln0KpVmT2FnByjHGf_53Jyv6j&export=download&confirm=t&uuid=48ebb2fa-a973-407f-bc48-a6b734b4ed27&at=AKKF8vxKRAdLb6aiYTDshNG_6LJG:1682537197691",
+        "config": "https://drive.google.com/uc?export=download&id=1M91xLi-Iz4HNJlr4ibb3XHxQI8WagiFU"
+    },
+    "wikiaggression": {
+        "model": "https://drive.google.com/u/1/uc?id=1QUtyEEXn83jkyhu1gMU1z88QidXJTr9S&export=download&confirm=t&uuid=efe3233d-5c57-4490-9730-d1ecbf1670a1&at=AKKF8vwbYfoMZvQk9zs6F3cWqjm_:1682556190329",
+        "config": "https://drive.google.com/uc?export=download&id=1X638LYwXkqO0L3h6q-3Njg0biJn5TX-d"
     }
 }

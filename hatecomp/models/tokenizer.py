@@ -1,7 +1,12 @@
 from typing import Callable, List
+import os
+import json
+import logging
+
 import torch
 from transformers import AutoTokenizer
-import logging
+
+from hatecomp.models.download import verify_pretrained_download, PRETRAINED_INSTALLATION_LOCATION
 
 # Suppress the too long message for tokinization, since we will handle that ourselves
 logging.getLogger("transformers.tokenization_utils_base").setLevel(logging.ERROR)
@@ -44,24 +49,34 @@ class HatecompTokenizer:
     ) -> "HatecompTokenizer":
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         return HatecompTokenizer(tokenizer, max_length=max_length)
+    
+    @classmethod
+    def from_hatecomp_pretrained(
+        self,
+        pretrained_model_name_or_path: str,
+        download: bool = False,
+        force_download: bool = False
+    ) -> "HatecompTokenizer":
+        pretrained_model_name_or_path = pretrained_model_name_or_path.lower()
+
+        verify_pretrained_download(
+            pretrained_model_name_or_path, download, force_download
+        )
+
+        # Load the model configuration
+        config_path = os.path.join(
+            PRETRAINED_INSTALLATION_LOCATION,
+            pretrained_model_name_or_path,
+            "config.json",
+        )
+        with open(config_path, "r") as f:
+            config = json.load(f)
+
+        return self.from_huggingface_pretrained(
+            config["transformer_name"], max_length=config["max_length"]
+        )
+
 
 
 if __name__ == "__main__":
-    tokenizer = HatecompTokenizer("roberta-base")
-    print(tokenizer("This is a test of the tokenizer.")["input_ids"].shape)
-    # now let's test a string with more than 512 tokens
-    print(
-        tokenizer(
-            """Some weights of the model checkpoint at roberta-base were not used when initializing RobertaForSequenceClassification: ['lm_head.dense.weight', 'lm_head.decoder.weight', 'roberta.pooler.dense.weight', 'lm_head.layer_norm.weight', 'lm_head.dense.bias', 'roberta.pooler.dense.bias', 'lm_head.bias', 'lm_head.layer_norm.bias']
-- This IS expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
-- This IS NOT expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
-Some weights of RobertaForSequenceClassification were not initialized from the model checkpoint at roberta-base and are newly initialized: ['classifier.dense.bias', 'classifier.out_proj.bias', 'classifier.out_proj.weight', 'classifier.dense.weight']
-You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-Some weights of the model checkpoint at roberta-base were not used when initializing RobertaForSequenceClassification: ['lm_head.dense.weight', 'lm_head.decoder.weight', 'roberta.pooler.dense.weight', 'lm_head.layer_norm.weight', 'lm_head.dense.bias', 'roberta.pooler.dense.bias', 'lm_head.bias', 'lm_head.layer_norm.bias']
-- This IS expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
-- This IS NOT expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
-Some weights of RobertaForSequenceClassification were not initialized from the model checkpoint at roberta-base and are newly initialized: ['classifier.dense.bias', 'classifier.out_proj.bias', 'classifier.out_proj.weight', 'classifier.dense.weight']
-You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-            """
-        )["input_ids"].shape
-    )
+    tokenizer = HatecompTokenizer.from_hatecomp_pretrained("MLMA", force_download=True)

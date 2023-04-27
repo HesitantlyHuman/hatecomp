@@ -22,6 +22,7 @@ class HatecompTrainer:
         tokenizer: Callable[[List[str]], List[int]],
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler._LRScheduler,
+        loss_function: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
         train_dataloader: torch.utils.data.DataLoader,
         test_dataloader: torch.utils.data.DataLoader,
         epochs: int,
@@ -40,6 +41,7 @@ class HatecompTrainer:
         self.tokenizer = tokenizer
         self.optimizer = optimizer
         self.scheduler = scheduler
+        self.loss_function = loss_function
         self.train_dataloader = train_dataloader
         self.test_dataloader = test_dataloader
         self.class_weights = class_weights
@@ -157,6 +159,7 @@ class HatecompTrainer:
                 self.train_dataloader,
                 self.optimizer,
                 self.scheduler,
+                self.loss_function,
                 self.class_weights,
                 device,
             )
@@ -165,6 +168,7 @@ class HatecompTrainer:
                 self.model,
                 self.tokenizer,
                 self.test_dataloader,
+                self.loss_function,
                 self.class_weights,
                 device,
             )

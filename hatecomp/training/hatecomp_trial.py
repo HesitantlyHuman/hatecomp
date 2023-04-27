@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Callable
 from dataclasses import dataclass, field
 import json
 import uuid
@@ -12,6 +12,7 @@ from hatecomp.datasets.base.data import _HatecompDataset
 from hatecomp.datasets.base.utils import id_collate, get_class_weights
 
 PARAMETERS_FILENAME = "trial_parameters.json"
+
 
 # Holds parameters for a single trial
 @dataclass
@@ -103,6 +104,7 @@ class HatecompTrialRunner:
         ) = self.get_dataloaders(self.dataset)
         self.tokenizer, self.model = self.get_tokenizer_and_model()
         self.optimizer, self.scheduler = self.get_optimizer_and_scheduler(self.model)
+        self.loss_function = self.get_loss_function()
 
     def load_or_save_parameters(self) -> None:
         # Load the parameters if they exist, save them otherwise
@@ -150,7 +152,7 @@ class HatecompTrialRunner:
         )
         tokenizer = HatecompTokenizer.from_huggingface_pretrained(
             self.configuration.transformer_name,
-            model.transformer.config.max_position_embeddings,
+            model.transformer.config.max_position_embeddings - 2,
         )
         model.to(self.configuration.device)
         return tokenizer, model
@@ -172,6 +174,14 @@ class HatecompTrialRunner:
         )
         return optimizer, scheduler
 
+    def get_loss_function(self) -> Callable[[torch.Tensor, torch.Tensor], torch.Tensor]:
+        if all([class_num == 1 for class_num in self.dataset.num_classes]):
+            return lambda input, target, weight: torch.nn.functional.binary_cross_entropy_with_logits(
+                input, target, pos_weight=weight
+            )
+        else:
+            return torch.nn.functional.cross_entropy
+
     def run(self) -> float:
         trainer = HatecompTrainer(
             self.trial_dir,
@@ -179,6 +189,7 @@ class HatecompTrialRunner:
             self.tokenizer,
             self.optimizer,
             self.scheduler,
+            self.loss_function,
             self.training_dataloader,
             self.test_dataloader,
             self.configuration.epochs,

@@ -6,7 +6,7 @@ import logging
 import torch
 from transformers import AutoModel
 
-from hatecomp.models.download import download_model, PRETRAINED_INSTALLATION_LOCATION
+from hatecomp.models.download import verify_pretrained_download, PRETRAINED_INSTALLATION_LOCATION
 
 # Suppress the huggingface warning about fine tuning the model
 logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
@@ -59,19 +59,12 @@ class HatecompClassifier(torch.nn.Module):
         download: bool = False,
         force_download: bool = False,
     ) -> "HatecompClassifier":
-        # Look for the model in the local directory
         pretrained_model_name_or_path = pretrained_model_name_or_path.lower()
-        local_path = os.path.join(
-            PRETRAINED_INSTALLATION_LOCATION, pretrained_model_name_or_path
+
+        # Download the model if it doesn't exist
+        verify_pretrained_download(
+            pretrained_model_name_or_path, download, force_download
         )
-        if not os.path.exists(local_path) or force_download:
-            if download or force_download:
-                download_model(pretrained_model_name_or_path)
-            else:
-                raise FileNotFoundError(
-                    f"Could not find the model {pretrained_model_name_or_path} in the local directory. "
-                    f"If you want to download the model, set download=True."
-                )
 
         # Load the model configuration
         config_path = os.path.join(
