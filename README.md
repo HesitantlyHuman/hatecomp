@@ -24,7 +24,7 @@ Of those the `MLMA Dataset` and `Online Intervention Dataset` only contain hatef
 `hatecomp` provides some basic training tools to integrate into the [huggingface](https://github.com/huggingface) :hugs: Trainer API. A full example of how to train a model using the hatecomp datasets can be found in `train.py`
 
 ### Results
-Here is a list of results acheived on various datasets with Huggingface models, along with the SOTA performance (as best I could find). Since it is not always possible to find SOTA scores for obscure datsets measured with a particular metric, the hatecomp score is selected to match whatever SOTA could be found. (The links are locations where the SOTA reference was found. If you are looking for citations, please refer to teh `About.md` for each dataset)
+Here is a list of results acheived on various datasets with Huggingface models, along with the SOTA performance (as best I could find). Since it is not always possible to find SOTA scores for obscure datsets measured with a particular metric, the hatecomp score is selected to match whatever SOTA could be found. (The links are locations where the SOTA reference was found. If you are looking for citations, please refer to the `About.md` for each dataset)
 
 | Dataset | Metric | SOTA | hatecomp/huggingface |
 | -- | -- | -- | -- |
@@ -48,13 +48,5 @@ Also note that some of these datasets require tweet data. For these, a large num
 This info is valid as of Feb 2022, and is probably subject to change as Twitter continues to lock down their API.
 
 ## TODO
-Implement a multi-task model, both for datasets with multiple tasks, and for the entire collection of datasets.
-Collect and organize the Cornell Conversational Analysis Toolkit datasets found [here](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit#datasets)
-Add sentiment lexicon https://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.html
-Update package and requirements.txt
-More hatespeech data?
-https://arxiv.org/abs/1802.00393
-https://github.com/ENCASEH2020/hatespeech-twitter
-Also, consider running the huggingface fine tuning on the entire corpus, and then training the mutlihead model.
 Better names for some of these datasets. Probably don't want a dataset named after a conference or github handle
 Update README
