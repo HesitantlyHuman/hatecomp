@@ -52,7 +52,7 @@ def compute_loss(
     loss = torch.tensor(0.0).to("cuda:0")
     for head_idx, head_outputs in enumerate(outputs):
         loss = loss_function(
-            torch.squeeze(head_outputs),
+            torch.squeeze(head_outputs, dim=1),
             labels[head_idx],
             weight=class_weights[head_idx],
         )

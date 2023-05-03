@@ -19,8 +19,8 @@ from hatecomp.datasets import (
 from hatecomp.training import HatecompTrialRunner, HatecompTrialConfig
 
 experiment_root = "experiments"
-dataset = HASOC()
-num_trials = 10
+dataset = WikiPersonalAttacks()
+num_trials = 2
 
 print("Loaded dataset: ", dataset.__name__)
 
