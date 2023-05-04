@@ -34,7 +34,10 @@ class _WikiDataset(_HatecompDataset):
             item_id = int(float(item[0]))
             if item_id not in annotations:
                 annotations[item_id] = []
-            annotations[item_id].append(float(item[3]))
+            try:
+                annotations[item_id].append(float(item[3]))
+            except IndexError:
+                continue
 
         # Compute labels
         for item_id, annotation in annotations.items():
@@ -50,9 +53,9 @@ class _WikiDataset(_HatecompDataset):
 
         # Combine comments and labels
         ids, data, labels = [], [], []
-        for item_id, comment in comments.items():
+        for item_id in set(comments.keys()).intersection(set(annotations.keys())):
             ids.append(item_id)
-            data.append(comment)
+            data.append(comments[item_id])
             labels.append(annotations[item_id])
 
         return (np.array(ids), data, np.array(labels))
