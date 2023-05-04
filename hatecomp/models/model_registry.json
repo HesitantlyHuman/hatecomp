@@ -26,5 +26,13 @@
     "wikiaggression": {
         "model": "https://drive.google.com/u/1/uc?id=1QUtyEEXn83jkyhu1gMU1z88QidXJTr9S&export=download&confirm=t&uuid=efe3233d-5c57-4490-9730-d1ecbf1670a1&at=AKKF8vwbYfoMZvQk9zs6F3cWqjm_:1682556190329",
         "config": "https://drive.google.com/uc?export=download&id=1X638LYwXkqO0L3h6q-3Njg0biJn5TX-d"
+    },
+    "wikipersonalattacks": {
+        "model": "https://drive.google.com/u/1/uc?id=1J7Y-20xaLBC4D-wlODCL7SzGcBwxq25_&export=download&confirm=t&uuid=b4e6ebcd-b9bf-4587-9d49-949c0db2da2b&at=AKKF8vwaWROpN7kzN75blfaHDhgv:1683134147908",
+        "config": "https://drive.google.com/uc?export=download&id=1syqGx4HjuhhmQbAE4qA8P1bJRtinYcDO"
+    },
+    "hasoc": {
+        "model": "https://drive.google.com/u/1/uc?id=1YG2QgK_mhBhNH-HY7LlsFZLj8p5AS53F&export=download&confirm=t&uuid=d66e6f27-cc0c-436a-982c-75def83c4fa5&at=AKKF8vwawCsKrI_Tlki_WCZ05hUR:1683134107819",
+        "config": "https://drive.google.com/uc?export=download&id=1vQMMeZSrh9xGvakR8XDxnhue-muER39L"
     }
 }
