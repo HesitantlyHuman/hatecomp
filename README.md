@@ -51,35 +51,79 @@ train_split, test_split = tokenized_dataset.spit(test_proportion = 0.1)
 ```
 
 ### Using a model
-The process for using a model is very similar to the huggingface Trainer API.
+Hatecomp also provides functionality for training models with these datasets, along with some pretrained models.
+
+#### Importing a pretrained model
+Loading one of our pretrained models is quite simple, and only requires using the name of the appropriate dataset to do so. The model will then be downloaded into the files of the local `hatecomp` package. Note this means that uninstalling `hatecomp` will delete the models, and this is intended behavior.
 ```python
-from hatecomp.datasets import Vicomtech
-from hatecomp.training import Trainer, TrainingArguments
-from hatecomp.base.utils import tokenize_bookends
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from hatecomp.models import HatecompClassifier, HatecompTokenizer
 
-raw_dataset = Vicomtech()
-tokenizer = AutoTokenizer.from_pretrained("roberta-base")
-num_classes = raw_dataset.num_classes()
-model = AutoModelForSequenceClassification.from_pretrained(
-    "roberta-base", num_labels = num_classes
-)
+# To load an already downloaded model
+model = HatecompClassifier.from_hatecomp_pretrained("Vicomtech")
+tokenizer = HatecompTokenizer.from_hatecomp_pretrained("Vicomtech")
 
-tokenizer_function = lambda tokenization_input: tokenize_bookends(
-    tokenization_input, model.config.max_position_embeddings, tokenizer
-)
-tokenized_dataset = raw_dataset.map(tokenizer_function, batched=True)
-train_split, test_split = tokenized_dataset.split()
+# To download a model if it does not exist locally
+model = HatecompClassifier.from_hatecomp_pretrained("Vicomtech", download=True)
+tokenizer = HatecompTokenizer.from_hatecomp_pretrained("Vicomtech")
 
-training_args = TrainingArguments("test-run")
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=train_split,
-    eval_dataset=test_split
-)
-trainer.train()
+# Force download a model (useful if the files become corrupted for any reason)
+model = HatecompClassifier.from_hatecomp_pretrained("Vicomtech", force_download=True)
+tokenizer = HatecompTokenizer.from_hatecomp_pretrained("Vicomtech")
 ```
+The tokenizers also have the same `download` and `force_download` flags available, but if you are loading the tokenizer directly after the model, the files will be installed locally already, as the download retrieves the necessary data for both the model and the tokenizer.
+
+#### Training models
+The process for training a model is quite simple, as there is a custom trainer class designed specifically for the datasets and models. Also included is a convenience `DataLoader` wrapper, which will handle collating the hatecomp data, since hatecomp datasets return ids, and the base `torch.utils.data.DataLoader` does not handle those by default. 
+```python
+import torch
+
+from hatecomp.datasets import Vicomtech
+from hatecomp.datasets.base import DataLoader
+
+from hatecomp.training import HatecompTrainer
+from hatecomp.models import HatecompClassifier, HatecompTokenizer
+
+dataset = Vicomtech()
+model = HatecompClassifier.from_huggingface_pretrained(
+    "roberta-base",
+    dataset.num_classes
+)
+tokenizer = HatecompTokenizer.from_huggingface_pretrained(
+    "roberta-base",
+)
+
+train_set, test_set = dataset.split(0.1)
+train_dataloader = DataLoader(train_set, batch_size=32)
+test_dataloader = DataLoader(test_set, batch_size=64)
+
+optimizer = torch.optim.AdamW(
+    model.parameters(),
+    lr=3e-5
+)
+scheduler = torch.optim.lr_scheduler.OneCycleLR(
+    optimizer,
+    max_lr=3e-5,
+    steps_per_epoch=len(train_dataloader),
+    epochs=5
+)
+
+loss_function = torch.nn.functional.cross_entropy
+
+trainer = HatecompTrainer(
+    root="root_directory",
+    model=model,
+    tokenizer=tokenizer,
+    optimizer=optimizer,
+    scheduler=scheduler,
+    loss_function=loss_function,
+    train_dataloader=train_dataloader,
+    test_dataloader=test_dataloader,
+    epochs=5
+)
+trainer.train("cuda")
+```
+
+For an even more expedited training process, there is also the `HatecompTrialRunner`, an example of using this class can be found in `scripts/hyperopt.py`.
 
 ## Datasets
 Additional information about each dataset can be found in the corresponding ABOUT.md file. 

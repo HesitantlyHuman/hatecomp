@@ -26,7 +26,7 @@ class HatecompTrainer:
         train_dataloader: torch.utils.data.DataLoader,
         test_dataloader: torch.utils.data.DataLoader,
         epochs: int,
-        class_weights: torch.Tensor,
+        class_weights: torch.Tensor = None,
         verbose: bool = True,
         checkpoint: bool = True,
     ) -> None:
@@ -44,7 +44,10 @@ class HatecompTrainer:
         self.loss_function = loss_function
         self.train_dataloader = train_dataloader
         self.test_dataloader = test_dataloader
-        self.class_weights = class_weights
+        if class_weights is None:
+            self.class_weights = [None for _ in range(len(model.heads))]
+        else:
+            self.class_weights = class_weights
 
         self.checkpoint = checkpoint
         if self.checkpoint:
@@ -154,23 +157,23 @@ class HatecompTrainer:
             print(f"Epoch {epoch + 1}/{self.epochs}")
             epoch_metrics = {"epoch": epoch}
             training_loss = training_epoch(
-                self.model,
-                self.tokenizer,
-                self.train_dataloader,
-                self.optimizer,
-                self.scheduler,
-                self.loss_function,
-                self.class_weights,
-                device,
+                model=self.model,
+                tokenizer=self.tokenizer,
+                dataloader=self.train_dataloader,
+                optimizer=self.optimizer,
+                scheduler=self.scheduler,
+                loss_function=self.loss_function,
+                class_weights=self.class_weights,
+                device=device,
             )
             epoch_metrics["training_loss"] = training_loss
             evaluation_metrics = evaluation_epoch(
-                self.model,
-                self.tokenizer,
-                self.test_dataloader,
-                self.loss_function,
-                self.class_weights,
-                device,
+                model=self.model,
+                tokenizer=self.tokenizer,
+                dataloader=self.test_dataloader,
+                loss_function=self.loss_function,
+                class_weights=self.class_weights,
+                device=device,
             )
             epoch_metrics["test_loss"] = evaluation_metrics["loss"]
             epoch_metrics["test_f1s"] = evaluation_metrics["f1s"]

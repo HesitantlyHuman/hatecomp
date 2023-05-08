@@ -9,7 +9,8 @@ import torch
 from hatecomp.models import HatecompClassifier, HatecompTokenizer
 from hatecomp.training import HatecompTrainer
 from hatecomp.datasets.base.data import _HatecompDataset
-from hatecomp.datasets.base.utils import id_collate, get_class_weights
+from hatecomp.datasets.base import DataLoader
+from hatecomp.datasets.base.utils import get_class_weights
 
 PARAMETERS_FILENAME = "trial_parameters.json"
 
@@ -129,17 +130,15 @@ class HatecompTrialRunner:
             task_weights.to(self.configuration.device)
             for task_weights in get_class_weights(train_set, dataset.num_classes)
         ]
-        train_dataloader = torch.utils.data.DataLoader(
+        train_dataloader = DataLoader(
             train_set,
             batch_size=self.configuration.training_batch_size,
             shuffle=True,
-            collate_fn=id_collate,
         )
-        test_dataloader = torch.utils.data.DataLoader(
+        test_dataloader = DataLoader(
             test_set,
             batch_size=self.configuration.evaluation_batch_size,
             shuffle=False,
-            collate_fn=id_collate,
         )
         return train_dataloader, test_dataloader, class_weights
 
