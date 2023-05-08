@@ -1,5 +1,24 @@
 # Hate Datasets Compilation
-Contains 17 different hate, violence, and discrimination speech datasets, along with anotations on where they were found, the data format and method for collection and labeling. Each dataset is kept in the original file structure and placed inside the respective folder's `data` file, in case a more recent version is obtained. (Links for the source are in each ABOUT.md file)
+Contains 17 different hate, violence, and discrimination speech datasets, along with anotations on where they were found, the data format and method for collection and labeling. Each dataset is kept in the original file structure and placed inside the respective folder's `data` file, in case a more recent version is obtained. (Links for the dataset's source are in each ABOUT.md file)
+
+## Datasets
+Additional information about each dataset can be found in the corresponding ABOUT.md file. 
+
+The following Datasets are implemented:
+- [ZeerakTalat NAACL](hatecomp/datasets/ZeerakTalat/README.md)
+- [ZeerakTalat NLPCSS](hatecomp/datasets/ZeerakTalat/README.md)
+- [HASOC](hatecomp/datasets/HASOC/README.md)
+- [Vicomtech](hatecomp/datasets/Vicomtech/README.md)
+- [TwitterSexism](hatecomp/datasets/TwitterSexism/README.md)
+- [MLMA](hatecomp/datasets/MLMA/README.md)
+- [WikiToxicity](hatecomp/datasets/WikiTalk/README.md)
+- [WikiAggression](hatecomp/datasets/WikiTalk/README.md)
+- [WikiPersonalAttacks](hatecomp/datasets/WikiTalk/README.md)
+
+Several more have downloaders already, and are close to completion
+
+### Notes
+Two of the datasets, `MLMA Dataset` and `Online Intervention Dataset`, only contain hateful posts, instead labeling other features such as the target of hate. Models trained on these datasets may be biased because of this.
 
 ## Installing
 To use the hatecomp datasets or models, simply run the following command in a python environment of your choice:
@@ -125,25 +144,6 @@ trainer.train("cuda")
 
 For an even more expedited training process, there is also the `HatecompTrialRunner`, an example of using this class can be found in `scripts/hyperopt.py`.
 
-## Datasets
-Additional information about each dataset can be found in the corresponding ABOUT.md file. 
-
-### Functionality
-Currently the following datasets are implemented:
-- [ZeerakTalat NAACL](hatecomp/datasets/ZeerakTalat/README.md)
-- [ZeerakTalat NLPCSS](hatecomp/datasets/ZeerakTalat/README.md)
-- [HASOC](hatecomp/datasets/HASOC/README.md)
-- [Vicomtech](hatecomp/datasets/Vicomtech/README.md)
-- [TwitterSexism](hatecomp/datasets/TwitterSexism/README.md)
-- [MLMA](hatecomp/datasets/MLMA/README.md)
-
-Several more have downloaders already, and are close to completion
-
-### Notes
-Two of the dataset, the `MLMA Dataset` and `Online Intervention Dataset`, only contain hateful posts, instead labeling other features such as the target of hate.
-
-## Training
-`hatecomp` provides some basic training tools to integrate into the [huggingface](https://github.com/huggingface) :hugs: Trainer API. A full example of how to train a model using the hatecomp datasets can be found in `train.py`
 
 ### Results
 Here is a list of results acheived on various datasets with Huggingface models, along with the SOTA performance (as best I could find). Since it is not always possible to find SOTA scores for obscure datsets measured with a particular metric, the hatecomp score is selected to match whatever SOTA could be found. (The links are locations where the SOTA reference was found. If you are looking for citations, please refer to the `About.md` for each dataset)
@@ -168,7 +168,3 @@ Also note that some of these datasets require tweet data. For these, a large num
 | TwitterSexism | 10583 | 5054 | 0.4775 |
 
 This info is valid as of Feb 2022, and is probably subject to change as Twitter continues to lock down their API.
-
-## TODO
-Better names for some of these datasets. Probably don't want a dataset named after a conference or github handle
-Update README
