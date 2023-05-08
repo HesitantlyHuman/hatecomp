@@ -7,14 +7,15 @@ README_FILE = open(os.path.join(PACKAGE_ROOT, "README.md"), "r").read()
 if __name__ == "__main__":
     setup(
         name="hatecomp",
-        version="0.3.0",
+        version="0.2.0",
         description="Collection of pytorch datasets for hate speech and toxic internet discourse",
         long_description=README_FILE,
         long_description_content_type="text/markdown",
-        url="https://github.com/GenerallyIntelligent/hatecomp",
-        author="GenerallyIntelligent",
-        author_email="tannersims@generallyintelligent.me",
+        url="https://github.com/HesitantlyHuman/hatecomp",
+        author="HesitantlyHuman",
+        author_email="tannersims@hesitantlyhuman.com",
         license="MIT",
+        package_data={"hatecomp": ["models/model_registry.json"]},
         packages=find_packages(),
         install_requires=[
             "aiometer >=0.3.0, <1.0.0",

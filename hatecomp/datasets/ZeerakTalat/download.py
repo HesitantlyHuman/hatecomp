@@ -2,7 +2,7 @@ import csv
 from collections import Counter
 
 from hatecomp.tweets.fetch import TweetDownloader
-from hatecomp.base.download import _CSVDownloader
+from hatecomp.datasets.base.download import _CSVDownloader
 
 
 class NAACLDownloader(_CSVDownloader):

@@ -2,7 +2,7 @@ import os
 import csv
 import shutil
 
-from hatecomp.base.download import _ZipDownloader
+from hatecomp.datasets.base.download import _ZipDownloader
 from hatecomp._path import install_path
 
 

@@ -1,52 +1,203 @@
-from typing import Optional
-from dataclasses import dataclass, field
-
+from typing import Callable, List
+import os
+import json
 import torch
-from transformers.trainer import Trainer, TrainingArguments
-from torch.utils.data import DataLoader
-from hatecomp.base.utils import get_class_weights
-from transformers.optimization import (
-    AdamW,
-    get_cosine_with_hard_restarts_schedule_with_warmup,
+
+from hatecomp.training.functional import (
+    print_centered,
+    training_epoch,
+    evaluation_epoch,
 )
 
-
-@dataclass
-class HatecompTrainingArguments(TrainingArguments):
-    lr_cycles: Optional[int] = field(
-        default=1,
-        metadata={
-            "help": "Sets the number of cycles for the learning rate scheduler to complete over training"
-        },
-    )
+CHECKPOINT_FILENAME = "checkpoint.pt"
+BEST_MODEL_FILENAME = "best_model.pt"
+METRICS_FILENAME = "metrics.json"
 
 
-class HatecompTrainer(Trainer):
-    def get_train_dataloader(self) -> DataLoader:
-        if self.train_dataset is None:
-            raise ValueError("Trainer: training requires a train_dataset.")
-        self.class_weights = get_class_weights(
-            self.train_dataset, self.model.config.num_labels
-        ).to(self.args.device)
-        return super().get_train_dataloader()
+class HatecompTrainer:
+    def __init__(
+        self,
+        root: str,
+        model: torch.nn.Module,
+        tokenizer: Callable[[List[str]], List[int]],
+        optimizer: torch.optim.Optimizer,
+        scheduler: torch.optim.lr_scheduler._LRScheduler,
+        loss_function: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
+        train_dataloader: torch.utils.data.DataLoader,
+        test_dataloader: torch.utils.data.DataLoader,
+        epochs: int,
+        class_weights: torch.Tensor,
+        verbose: bool = True,
+        checkpoint: bool = True,
+    ) -> None:
+        self.root = root
+        self.metrics = []
+        self.best_loss = float("inf")
+        self.epoch = 0
+        self.epochs = epochs
+        self.verbose = verbose
 
-    def compute_loss(self, model, inputs, return_outputs=False):
-        labels = inputs.get("labels")
+        self.model = model
+        self.tokenizer = tokenizer
+        self.optimizer = optimizer
+        self.scheduler = scheduler
+        self.loss_function = loss_function
+        self.train_dataloader = train_dataloader
+        self.test_dataloader = test_dataloader
+        self.class_weights = class_weights
 
-        outputs = model(**inputs)
-        logits = outputs.get("logits")
+        self.checkpoint = checkpoint
+        if self.checkpoint:
+            self.load_checkpoint()
 
-        loss_fct = torch.nn.CrossEntropyLoss(weight=self.class_weights)
-        loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
-        return (loss, outputs) if return_outputs else loss
+    def load_checkpoint(self) -> None:
+        # Verify that the root directory exists
+        if not os.path.exists(self.root):
+            os.makedirs(self.root)
 
-    def create_scheduler(
-        self, num_training_steps: int, optimizer: torch.optim.Optimizer = None
-    ):
-        if self.lr_scheduler is None:
-            self.lr_scheduler = get_cosine_with_hard_restarts_schedule_with_warmup(
-                optimizer=self.optimizer if optimizer is None else optimizer,
-                num_warmup_steps=self.args.get_warmup_steps(num_training_steps),
-                num_training_steps=num_training_steps,
-                num_cycles=self.args.lr_cycles,
+        # Load the checkpoint if it exists
+        checkpoint_path = os.path.join(self.root, CHECKPOINT_FILENAME)
+        if os.path.exists(checkpoint_path):
+            checkpoint = torch.load(checkpoint_path)
+            self.model.load_state_dict(checkpoint["model_state_dict"])
+            self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            self.scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+            self.epoch = checkpoint["epoch"]
+            self.best_loss = checkpoint["best_loss"]
+            self.log(
+                f"Loaded checkpoint from epoch {self.epoch} with best loss {self.best_loss}"
             )
+
+        # Load the metrics if they exist and convert the confusion matrices to tensors
+        metrics_path = os.path.join(self.root, METRICS_FILENAME)
+        if os.path.exists(metrics_path):
+            with open(metrics_path, "r") as metrics_file:
+                self.metrics = json.load(metrics_file)
+            for epoch_metrics in self.metrics:
+                epoch_metrics["test_confusion_matrices"] = [
+                    torch.tensor(confusion_matrix)
+                    for confusion_matrix in epoch_metrics["test_confusion_matrices"]
+                ]
+
+    def save_metrics(self) -> None:
+        # Save the metrics, making sure that we convert the confusion matrices to lists
+        # so that they can be serialized.
+        with open(os.path.join(self.root, METRICS_FILENAME), "w") as f:
+            formatted_metrics = [
+                {
+                    "epoch": metric["epoch"],
+                    "training_loss": metric["training_loss"],
+                    "test_loss": metric["test_loss"],
+                    "test_f1s": [f1.tolist() for f1 in metric["test_f1s"]],
+                    "test_accuracies": metric["test_accuracies"],
+                    "test_confusion_matrices": [
+                        confusion_matrix.tolist()
+                        for confusion_matrix in metric["test_confusion_matrices"]
+                    ],
+                }
+                for metric in self.metrics
+            ]
+            json.dump(formatted_metrics, f, indent=4)
+
+    def save_checkpoint(self, epoch_loss: float) -> None:
+        # Save the best model
+        if epoch_loss < self.best_loss:
+            self.best_loss = epoch_loss
+            torch.save(
+                self.model.state_dict(), os.path.join(self.root, BEST_MODEL_FILENAME)
+            )
+
+        # Save the checkpoint
+        torch.save(
+            {
+                "epoch": self.epoch,
+                "best_loss": self.best_loss,
+                "model_state_dict": self.model.state_dict(),
+                "optimizer_state_dict": self.optimizer.state_dict(),
+                "scheduler_state_dict": self.scheduler.state_dict(),
+            },
+            os.path.join(self.root, CHECKPOINT_FILENAME),
+        )
+
+    def delete_checkpoint(self) -> None:
+        checkpoint_path = os.path.join(self.root, CHECKPOINT_FILENAME)
+        if os.path.exists(checkpoint_path):
+            os.remove(checkpoint_path)
+
+    def report_training_results(self) -> None:
+        if self.checkpoint:
+            self.log(
+                f"Best model saved to '{os.path.abspath(os.path.join(self.root, BEST_MODEL_FILENAME))}'"
+            )
+        self.log(
+            f"Metrics saved to '{os.path.abspath(os.path.join(self.root, METRICS_FILENAME))}'"
+        )
+        self.log("--- Metrics ---")
+        best_epoch = min(self.metrics, key=lambda metric: metric["test_loss"])
+        self.log(f"    Best epoch : {best_epoch['epoch'] + 1}")
+        self.log(f"    Test loss : {best_epoch['test_loss']:.4f}")
+        self.log("    Test Accuracies: ", end="")
+        for metric in best_epoch["test_accuracies"]:
+            self.log(f"{metric:.4f}, ", end="")
+        self.log("")
+        self.log("    Test F1s:", end="")
+        for metric in best_epoch["test_f1s"]:
+            self.log("\n        ", end="")
+            for element in metric:
+                self.log(f"{element:.4f}, ", end="")
+        self.log("")
+
+    def train(self, device: str = "cuda") -> None:
+        self.model.to(device)
+        self.log("--- Training ---", centered=True)
+        for epoch in range(self.epoch, self.epochs):
+            print(f"Epoch {epoch + 1}/{self.epochs}")
+            epoch_metrics = {"epoch": epoch}
+            training_loss = training_epoch(
+                self.model,
+                self.tokenizer,
+                self.train_dataloader,
+                self.optimizer,
+                self.scheduler,
+                self.loss_function,
+                self.class_weights,
+                device,
+            )
+            epoch_metrics["training_loss"] = training_loss
+            evaluation_metrics = evaluation_epoch(
+                self.model,
+                self.tokenizer,
+                self.test_dataloader,
+                self.loss_function,
+                self.class_weights,
+                device,
+            )
+            epoch_metrics["test_loss"] = evaluation_metrics["loss"]
+            epoch_metrics["test_f1s"] = evaluation_metrics["f1s"]
+            epoch_metrics["test_accuracies"] = evaluation_metrics["accuracies"]
+            epoch_metrics["test_confusion_matrices"] = evaluation_metrics[
+                "confusion_matrices"
+            ]
+            self.epoch += 1
+            self.metrics.append(epoch_metrics)
+            if self.checkpoint:
+                self.save_checkpoint(evaluation_metrics["loss"])
+            self.save_metrics()
+        self.delete_checkpoint()
+        self.log("--- Training complete ---", centered=True)
+        self.report_training_results()
+
+        # Release the GPU memory manually because huggingface won't
+        # clean up after itself.
+        del self.model
+        del self.optimizer
+        del self.scheduler
+        del self.class_weights
+        torch.cuda.empty_cache()
+
+    def log(self, string, centered: bool = False, **kwargs) -> None:
+        if self.verbose:
+            if centered:
+                print_centered(string, **kwargs)
+            else:
+                print(string, **kwargs)

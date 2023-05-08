@@ -1,8 +1,13 @@
 # vscode
 .vscode
 
-# Huggingface
-results
+# Training
+experiments
+
+# Pretrained models
+pretrained
+
+figures
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -11,9 +16,6 @@ __pycache__/
 
 # All of the repo data
 data/
-
-# Twitter stuff
-hatecomp/twitter/keys.json
 
 # C extensions
 *.so

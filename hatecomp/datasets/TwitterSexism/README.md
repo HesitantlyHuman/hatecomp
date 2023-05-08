@@ -4,7 +4,7 @@ PAPER: https://aclanthology.org/W17-2902/
 DATA: https://github.com/AkshitaJha/NLP_CSS_2017
 FORMAT: tsv
 LANGUAGE: english
-ABOUT: Contains two lists of Twitter Tweet IDs, one for each of the two categories of sexist content. The authors call these two categories "Benevolent" and "Hostile".
+ABOUT: This dataset only contains sexist tweets. The tweets are split into two categories: "benevolent" and "hostile". A list of Tweet IDs are provided for both.
 METHOD: [TODO]
 CITATION:
 ```
