@@ -28,7 +28,7 @@ pip install hatecomp
 
 If you do not have pytorch already installed, it is recommended to do so using conda. Visit the pytorch [website](https://pytorch.org/) for more information.
 
-Once it has finished downloading, you can start loading in datasets and models. Below are a couple of examples to get you started. For more advanced usage, please see the `train.py` file in the root of this repo. `hatecomp` follows the huggingface training API, so most everything that works with huggingface will work here.
+Once it has finished downloading, you can start loading in datasets and models. Below are a couple of examples to get you started. For more advanced usage, please see `scripts/train.py`.
 
 ## Examples
 Here are a couple examples of how to use the hatecomp library.
@@ -66,7 +66,7 @@ dataset = Vicomtech()
 tokenized_dataset = dataset.map(function = my_tokenizing_function, batched = False)
 
 # Splitting the dataset
-train_split, test_split = tokenized_dataset.spit(test_proportion = 0.1)
+train_split, test_split = tokenized_dataset.split(test_proportion = 0.1)
 ```
 
 ### Using a model
