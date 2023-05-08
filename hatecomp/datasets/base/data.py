@@ -1,4 +1,4 @@
-from typing import Callable, List, Mapping, Tuple, Union
+from typing import Callable, List, Mapping, Tuple, Union, Sequence
 import logging
 
 import torch
@@ -102,11 +102,14 @@ class _HatecompDataset(IterableDataset):
         if not batched:
             batch_size = 1
 
-        for (slice, data_group) in batch_and_slice(self.data, batch_size):
+        for slice, data_group in batch_and_slice(self.data, batch_size):
             mapped_data = function(data_group)
-            assert len(mapped_data) == len(
-                data_group
-            ), "Mapping function did not return output of equal length over input batch!"
+            if isinstance(mapped_data, Sequence):
+                assert len(mapped_data) == len(
+                    data_group
+                ), "Mapping function did not return output of equal length over input batch!"
+            else:
+                mapped_data = [mapped_data]
             self.data[slice] = mapped_data
 
         return self
