@@ -6,7 +6,10 @@ import logging
 import torch
 from transformers import AutoModel
 
-from hatecomp.models.download import verify_pretrained_download, PRETRAINED_INSTALLATION_LOCATION
+from hatecomp.models.download import (
+    verify_pretrained_download,
+    PRETRAINED_INSTALLATION_LOCATION,
+)
 
 # Suppress the huggingface warning about fine tuning the model
 logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
@@ -87,7 +90,7 @@ class HatecompClassifier(torch.nn.Module):
         state_dict_path = os.path.join(
             PRETRAINED_INSTALLATION_LOCATION, pretrained_model_name_or_path, "model.pt"
         )
-        model.load_state_dict(torch.load(state_dict_path))
+        model.load_state_dict(torch.load(state_dict_path, map_location="cpu"))
 
         # Return the model
         return model
