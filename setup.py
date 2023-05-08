@@ -7,7 +7,7 @@ README_FILE = open(os.path.join(PACKAGE_ROOT, "README.md"), "r").read()
 if __name__ == "__main__":
     setup(
         name="hatecomp",
-        version="0.4.1",
+        version="0.4.2",
         description="Collection of pytorch datasets for hate speech and toxic internet discourse",
         long_description=README_FILE,
         long_description_content_type="text/markdown",
