@@ -1,13 +1,90 @@
 # Hate Datasets Compilation
 Contains 17 different hate, violence, and discrimination speech datasets, along with anotations on where they were found, the data format and method for collection and labeling. Each dataset is kept in the original file structure and placed inside the respective folder's `data` file, in case a more recent version is obtained. (Links for the source are in each ABOUT.md file)
 
-## Using
-[TODO]: Detail how to download and use
+## Installing
+To use the hatecomp datasets or models, simply run the following command in a python environment of your choice:
+```shell
+pip install hatecomp
+```
+
+If you do not have pytorch already installed, it is recommended to do so using conda. Visit the pytorch [website](https://pytorch.org/) for more information.
+
+Once it has finished downloading, you can start loading in datasets and models. Below are a couple of examples to get you started. For more advanced usage, please see the `train.py` file in the root of this repo. `hatecomp` follows the huggingface training API, so most everything that works with huggingface will work here.
+
+## Examples
+Here are a couple examples of how to use the hatecomp library.
+
+### Working with a Dataset
+Loading datasets is very simple. Each has its own downloading script that will run lazily when you try to create the dataset. If you would like to, you can specify where to download and if the dataset should download. By default the datasets only download when they cannot find the necessary files in the given location.
+```python
+from hatecomp.datasets import Vicomtech
+
+# load a dataset from the default location,
+# or download the dataset in the default location
+dataset = Vicomtech()
+example = dataset[0]
+
+# load a dataset from a specified location,
+# or download to that location
+dataset = Vicomtech(root = "my/special/dataset/path")
+example = dataset[0]
+
+# only load a dataset if it can be found at the given location
+dataset = Vicomtech(root = "my/special/dataset/path", download = False)
+example = dataset[0]
+```
+
+The datasets also come equipped with a couple of handy features designed especially for NLP use and convenience.
+
+```python
+from hatecomp.datasets import Vicomtech
+
+# Mapping a function over the dataset data (usually text, unless the dataset has already been mapped)
+# Note that the map function can support batching if your mapped function supports it.
+def my_tokenizing_function(some_string):
+    return 0
+dataset = Vicomtech()
+tokenized_dataset = dataset.map(function = my_tokenizing_function, batched = False)
+
+# Splitting the dataset
+train_split, test_split = tokenized_dataset.spit(test_proportion = 0.1)
+```
+
+### Using a model
+The process for using a model is very similar to the huggingface Trainer API.
+```python
+from hatecomp.datasets import Vicomtech
+from hatecomp.training import Trainer, TrainingArguments
+from hatecomp.base.utils import tokenize_bookends
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+raw_dataset = Vicomtech()
+tokenizer = AutoTokenizer.from_pretrained("roberta-base")
+num_classes = raw_dataset.num_classes()
+model = AutoModelForSequenceClassification.from_pretrained(
+    "roberta-base", num_labels = num_classes
+)
+
+tokenizer_function = lambda tokenization_input: tokenize_bookends(
+    tokenization_input, model.config.max_position_embeddings, tokenizer
+)
+tokenized_dataset = raw_dataset.map(tokenizer_function, batched=True)
+train_split, test_split = tokenized_dataset.split()
+
+training_args = TrainingArguments("test-run")
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_split,
+    eval_dataset=test_split
+)
+trainer.train()
+```
 
 ## Datasets
-Additional information about each dataset can be found the corresponding ABOUT.md file. 
+Additional information about each dataset can be found in the corresponding ABOUT.md file. 
 
-### Working
+### Functionality
 Currently the following datasets are implemented:
 - [ZeerakTalat NAACL](hatecomp/datasets/ZeerakTalat/README.md)
 - [ZeerakTalat NLPCSS](hatecomp/datasets/ZeerakTalat/README.md)
@@ -16,9 +93,10 @@ Currently the following datasets are implemented:
 - [TwitterSexism](hatecomp/datasets/TwitterSexism/README.md)
 - [MLMA](hatecomp/datasets/MLMA/README.md)
 
-### Notes
+Several more have downloaders already, and are close to completion
 
-Of those the `MLMA Dataset` and `Online Intervention Dataset` only contain hateful posts, instead labelling other features such as the target of hate.
+### Notes
+Two of the dataset, the `MLMA Dataset` and `Online Intervention Dataset`, only contain hateful posts, instead labeling other features such as the target of hate.
 
 ## Training
 `hatecomp` provides some basic training tools to integrate into the [huggingface](https://github.com/huggingface) :hugs: Trainer API. A full example of how to train a model using the hatecomp datasets can be found in `train.py`

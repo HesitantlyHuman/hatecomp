@@ -19,3 +19,4 @@ tweepy==4.4.0
 typing-extensions==3.10.0.2
 urllib3==1.26.7
 wheel==0.37.0
+transformers==4.16.2
